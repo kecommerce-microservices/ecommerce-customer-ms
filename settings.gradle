@@ -1,0 +1,5 @@
+rootProject.name = 'ecommerce-customer-ms'
+include 'domain'
+include 'application'
+include 'infrastructure'
+

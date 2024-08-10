@@ -1,0 +1,75 @@
+plugins {
+    id 'java-library'
+    id 'java-conventions'
+    id 'jacoco-report-aggregation'
+}
+
+group = 'com.kaua.ecommerce.customer.infrastructure'
+
+//bootJar {
+//    archiveFileName = 'ecommerce-customer-ms.jar'
+//    destinationDirectory.set(file("${rootProject.layout.buildDirectory.get()}/libs"))
+//}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation(project(':domain'))
+    implementation(project(':application'))
+
+    testImplementation(project(path: ':domain', configuration: 'testClasses'))
+}
+
+jacocoTestReport {
+    afterEvaluate {
+        classDirectories.setFrom(
+                files(classDirectories.files.collect {
+                    fileTree(dir: it, exclude: [
+//                            'com/kaua/ecommerce/customer/infrastructure/configurations/*',
+                            'com/kaua/ecommerce/customer/infrastructure/Main.class'
+                    ])
+                })
+        )
+    }
+}
+
+testCodeCoverageReport {
+    reports {
+        csv.required = true
+        csv.outputLocation = file("$rootDir/build/reports/jacoco/test/jacocoTestReport.csv")
+        html.required = true
+        html.outputLocation = file("$rootDir/build/reports/jacoco/test/jacocoTestReport.html")
+        xml.required = true
+        xml.outputLocation = file("$rootDir/build/reports/jacoco/test/jacocoTestReport.xml")
+    }
+
+    afterEvaluate {
+        classDirectories.setFrom(
+                files(classDirectories.files.collect {
+                    fileTree(dir: it, exclude: [
+//                            'com/kaua/ecommerce/customer/infrastructure/configurations/*',
+                            'com/kaua/ecommerce/customer/infrastructure/Main.class'
+                    ])
+                })
+        )
+    }
+}
+
+jacocoTestCoverageVerification {
+    afterEvaluate {
+        classDirectories.setFrom(
+                files(classDirectories.files.collect {
+                    fileTree(dir: it, exclude: [
+//                            'com/kaua/ecommerce/customer/infrastructure/configurations/*',
+                            'com/kaua/ecommerce/customer/infrastructure/Main.class'
+                    ])
+                })
+        )
+    }
+}
+
+tasks.named("jacocoTestReport") {
+    dependsOn(testCodeCoverageReport)
+}
