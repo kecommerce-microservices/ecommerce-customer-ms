@@ -9,6 +9,6 @@ sonar {
         property "sonar.host.url", "https://sonarcloud.io"
         property "sonar.coverage.jacoco.xmlReportPaths", "${rootDir}/build/reports/jacoco/test/jacocoTestReport.xml"
         property "sonar.coverage.exclusions", "infrastructure/src/main/java/com/kaua/ecommerce/customer/infrastructure/Main.java,infrastructure/src/main/java/com/kaua/ecommerce/customer/infrastructure/jdbc/**,infrastructure/src/main/java/com/kaua/ecommerce/customer/infrastructure/configurations/**"
-        property "sonar.exclusions", "infrastructure/src/main/java/com/kaua/ecommerce/customer/infrastructure/Main.java,infrastructure/src/main/java/com/kaua/ecommerce/customer/infrastructure/jdbc/**,infrastructure/src/main/java/com/kaua/ecommerce/customer/infrastructure/configurations/**,infrastructure/src/main/resources/application-test-**.yml"
+        property "sonar.exclusions", "infrastructure/src/main/java/com/kaua/ecommerce/customer/infrastructure/Main.java,infrastructure/src/main/java/com/kaua/ecommerce/customer/infrastructure/jdbc/**,infrastructure/src/main/java/com/kaua/ecommerce/customer/infrastructure/configurations/**,infrastructure/**/application-*.yml"
     }
 }
