@@ -2,14 +2,17 @@ plugins {
     id 'java-library'
     id 'java-conventions'
     id 'jacoco-report-aggregation'
+    id 'org.springframework.boot' version '3.2.5'
+    id 'io.spring.dependency-management' version '1.1.5'
+    id 'org.flywaydb.flyway' version '10.13.0'
 }
 
 group = 'com.kaua.ecommerce.customer.infrastructure'
 
-//bootJar {
-//    archiveFileName = 'ecommerce-customer-ms.jar'
-//    destinationDirectory.set(file("${rootProject.layout.buildDirectory.get()}/libs"))
-//}
+bootJar {
+    archiveFileName = 'ecommerce-customer-ms.jar'
+    destinationDirectory.set(file("${rootProject.layout.buildDirectory.get()}/libs"))
+}
 
 repositories {
     mavenCentral()
@@ -19,7 +22,31 @@ dependencies {
     implementation(project(':domain'))
     implementation(project(':application'))
 
+    implementation 'org.postgresql:postgresql'
+    implementation 'org.flywaydb:flyway-core'
+
+    implementation('org.springframework.boot:spring-boot-starter-web') {
+        exclude module: 'spring-boot-starter-tomcat'
+    }
+    implementation 'org.springframework.boot:spring-boot-starter-undertow'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
+
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
+
+    implementation 'com.fasterxml.jackson.module:jackson-module-blackbird'
+
+    implementation 'com.kaua.ecommerce.common-lib.infrastructure:infrastructure:0.5.1'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'com.h2database:h2'
+
     testImplementation(project(path: ':domain', configuration: 'testClasses'))
+}
+
+flyway {
+    url = 'jdbc:postgresql://' + System.getenv('DATABASE_POSTGRESQL_URL') + '/auth-server-ms' ?: 'jdbc:postgresql://localhost:5432/accounts-ms'
+    user = System.getenv('DATABASE_POSTGRESQL_USERNAME') ?: 'postgres'
+    password = System.getenv('DATABASE_POSTGRESQL_PASSWORD') ?: '123456'
 }
 
 jacocoTestReport {
@@ -27,7 +54,8 @@ jacocoTestReport {
         classDirectories.setFrom(
                 files(classDirectories.files.collect {
                     fileTree(dir: it, exclude: [
-//                            'com/kaua/ecommerce/customer/infrastructure/configurations/*',
+                            'com/kaua/ecommerce/customer/infrastructure/configurations/*',
+                            'com/kaua/ecommerce/customer/infrastructure/jdbc/*',
                             'com/kaua/ecommerce/customer/infrastructure/Main.class'
                     ])
                 })
@@ -49,7 +77,8 @@ testCodeCoverageReport {
         classDirectories.setFrom(
                 files(classDirectories.files.collect {
                     fileTree(dir: it, exclude: [
-//                            'com/kaua/ecommerce/customer/infrastructure/configurations/*',
+                            'com/kaua/ecommerce/customer/infrastructure/configurations/*',
+                            'com/kaua/ecommerce/customer/infrastructure/jdbc/*',
                             'com/kaua/ecommerce/customer/infrastructure/Main.class'
                     ])
                 })
@@ -62,7 +91,8 @@ jacocoTestCoverageVerification {
         classDirectories.setFrom(
                 files(classDirectories.files.collect {
                     fileTree(dir: it, exclude: [
-//                            'com/kaua/ecommerce/customer/infrastructure/configurations/*',
+                            'com/kaua/ecommerce/customer/infrastructure/configurations/*',
+                            'com/kaua/ecommerce/customer/infrastructure/jdbc/*',
                             'com/kaua/ecommerce/customer/infrastructure/Main.class'
                     ])
                 })

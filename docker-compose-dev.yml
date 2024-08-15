@@ -1,0 +1,19 @@
+version: '3.7'
+
+services:
+  postgres:
+    container_name: ecommerce-customer-ms-postgres
+    image: postgres:latest
+    restart: on-failure
+    profiles: ["all"]
+    environment:
+      - POSTGRES_DB=customer-ms
+      - POSTGRES_PASSWORD=123456
+      - POSTGRES_ROOT_HOST=%
+    ports:
+      - "5434:5432"
+    networks:
+      - ecommerce-customer-ms-network
+
+networks:
+  ecommerce-customer-ms-network:

@@ -130,4 +130,4 @@ jobs:
           distribution: 'temurin'
 
       - name: Build application
-        run: ./gradlew clean build -x tests
+        run: ./gradlew clean build -x test

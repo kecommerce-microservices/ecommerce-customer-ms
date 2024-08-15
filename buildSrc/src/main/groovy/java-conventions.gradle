@@ -3,7 +3,7 @@ plugins {
     id 'jacoco'
 }
 
-version = '0.1.0'
+version = '0.2.0'
 
 repositories {
     mavenCentral()
@@ -18,7 +18,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.kaua.ecommerce.common-lib.domain:domain:0.4.0'
+    implementation 'com.kaua.ecommerce.common-lib.domain:domain:0.5.1'
 
     testImplementation 'org.mockito:mockito-junit-jupiter:4.8.1'
     testImplementation platform('org.junit:junit-bom:5.9.1')
