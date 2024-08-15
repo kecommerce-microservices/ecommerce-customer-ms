@@ -6,17 +6,12 @@ import com.kaua.ecommerce.lib.domain.exceptions.DomainException;
 import com.kaua.ecommerce.lib.domain.exceptions.InternalErrorException;
 import com.kaua.ecommerce.lib.domain.exceptions.NotFoundException;
 import com.kaua.ecommerce.lib.domain.exceptions.ValidationException;
-import com.kaua.ecommerce.lib.domain.validation.Error;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import java.util.List;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -63,11 +58,5 @@ public class GlobalExceptionHandler {
         log.error("Handling internal error exception: {}", ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiError.from(ex.getMessage()));
-    }
-
-    private List<Error> covertError(List<ObjectError> allErrors) {
-        return allErrors.stream()
-                .map(e -> new Error(((FieldError) e).getField(), e.getDefaultMessage()))
-                .toList();
     }
 }
