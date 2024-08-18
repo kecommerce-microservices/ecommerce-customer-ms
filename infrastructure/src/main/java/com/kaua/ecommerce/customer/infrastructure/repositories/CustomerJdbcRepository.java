@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -66,8 +67,8 @@ public class CustomerJdbcRepository implements CustomerRepository {
         aParams.put("lastName", aCustomer.getName().lastName());
         aParams.put("documentNumber", aCustomer.getDocument().map(Document::value).orElse(null));
         aParams.put("documentType", aCustomer.getDocument().map(Document::type).orElse(null));
-        aParams.put("createdAt", aCustomer.getCreatedAt());
-        aParams.put("updatedAt", aCustomer.getUpdatedAt());
+        aParams.put("createdAt", Timestamp.from(aCustomer.getCreatedAt()));
+        aParams.put("updatedAt", Timestamp.from(aCustomer.getUpdatedAt()));
 
         this.databaseClient.update(sql, aParams);
     }
