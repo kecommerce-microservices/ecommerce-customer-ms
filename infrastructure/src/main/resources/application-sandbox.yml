@@ -1,0 +1,23 @@
+auth-server:
+  client-id: ecommerce-microservices
+  client-secret: 123456
+
+web-client:
+  auth-server-url: http://localhost:8080
+
+server:
+  undertow:
+    threads:
+      worker: 10
+      io: 2
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5434/customer-ms
+    username: postgres
+    password: 123456
+  jpa:
+    show-sql: true
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
