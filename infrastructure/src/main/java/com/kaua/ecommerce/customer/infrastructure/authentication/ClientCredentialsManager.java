@@ -5,15 +5,12 @@ import com.kaua.ecommerce.customer.infrastructure.configurations.properties.Auth
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Component
 public class ClientCredentialsManager implements GetClientCredentials, RefreshClientCredentials {
 
-    private static final AtomicReferenceFieldUpdater<ClientCredentialsManager, ClientCredentials> UPDATER
-            = AtomicReferenceFieldUpdater.newUpdater(ClientCredentialsManager.class, ClientCredentials.class, "credentials");
-
-    private volatile ClientCredentials credentials;
+    private final AtomicReference<ClientCredentials> credentials = new AtomicReference<>();
 
     private final AuthenticationGateway authenticationGateway;
     private final AuthServerProperties authServerProperties;
@@ -28,7 +25,7 @@ public class ClientCredentialsManager implements GetClientCredentials, RefreshCl
 
     @Override
     public String retrieve() {
-        return this.credentials.accessToken;
+        return this.credentials.get().accessToken();
     }
 
     @Override
@@ -36,7 +33,7 @@ public class ClientCredentialsManager implements GetClientCredentials, RefreshCl
         final var aResult = this.authenticationGateway
                 .login(new ClientCredentialsInput(clientId(), clientSecret()));
 
-        UPDATER.set(this, new ClientCredentials(aResult.accessToken()));
+        this.credentials.set(new ClientCredentials(aResult.accessToken()));
     }
 
     private String clientId() {
