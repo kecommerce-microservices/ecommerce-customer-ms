@@ -3,6 +3,24 @@ logging:
     ROOT: WARN
     com.kaua.ecommerce: DEBUG
 
+auth-server:
+  token-uri: /oauth2/token
+
+web-client:
+  auth-server:
+    base-url: "${web-client.auth-server-url}/api"
+    read-timeout: 2_000 # milliseconds
+    connect-timeout: 2_000 # milliseconds
+  users:
+    base-url: "${web-client.auth-server-url}/api/v1/users"
+    read-timeout: 2_000 # milliseconds
+    connect-timeout: 2_000 # milliseconds
+
+jobs:
+  client-credentials:
+    refresh-rate-minutes: 3
+    refresh-initial-delay-minutes: 4
+
 server:
   port: 8081
   servlet:
