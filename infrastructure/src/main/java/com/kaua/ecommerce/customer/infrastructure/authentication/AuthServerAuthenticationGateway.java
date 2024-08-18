@@ -45,8 +45,8 @@ public class AuthServerAuthenticationGateway implements AuthenticationGateway, H
                 .header(HttpHeaders.AUTHORIZATION, "Basic " + aEncodedCredentials)
                 .body(BodyInserters.fromFormData("grant_type", "client_credentials"))
                 .retrieve()
-                .onStatus(isBadRequest, badRequestHandler(null))
-                .onStatus(is5xx, badRequestHandler(null))
+                .onStatus(isBadRequest, badRequestHandler(input.clientId()))
+                .onStatus(is5xx, a5xxHandler(input.clientId()))
                 .bodyToMono(AuthServerAuthenticationResult.class)
                 .block());
 
