@@ -8,6 +8,9 @@ import com.kaua.ecommerce.customer.infrastructure.authentication.GetClientCreden
 import com.kaua.ecommerce.customer.infrastructure.configurations.annotations.Users;
 import com.kaua.ecommerce.customer.infrastructure.configurations.properties.WebClientProperties;
 import com.kaua.ecommerce.lib.infrastructure.clients.HttpClientUtils;
+import io.github.resilience4j.bulkhead.annotation.Bulkhead;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -22,10 +25,9 @@ import java.util.UUID;
 @Component
 public class AuthServerIdentityProviderClient implements IdentityProviderGateway, HttpClientUtils {
 
-    private static final Logger log = LoggerFactory.getLogger(AuthServerIdentityProviderClient.class);
-
     public static final String NAMESPACE_NAME = "users";
 
+    private static final Logger log = LoggerFactory.getLogger(AuthServerIdentityProviderClient.class);
     private static final String CREATE_USER_ACTION = "creating user";
 
     private final String userUrl;
@@ -42,6 +44,9 @@ public class AuthServerIdentityProviderClient implements IdentityProviderGateway
         this.getClientCredentials = Objects.requireNonNull(getClientCredentials);
     }
 
+    @Bulkhead(name = NAMESPACE_NAME)
+    @CircuitBreaker(name = NAMESPACE_NAME)
+    @Retry(name = NAMESPACE_NAME)
     @Override
     public UserId create(final User user) {
         final var aCustomerId = user.getCustomerId().value().toString();
