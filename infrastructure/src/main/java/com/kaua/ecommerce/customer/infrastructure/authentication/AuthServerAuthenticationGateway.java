@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.kaua.ecommerce.customer.infrastructure.configurations.annotations.AuthServer;
 import com.kaua.ecommerce.customer.infrastructure.configurations.properties.AuthServerProperties;
 import com.kaua.ecommerce.lib.infrastructure.clients.HttpClientUtils;
+import io.github.resilience4j.retry.annotation.Retry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -18,6 +19,8 @@ import java.util.Objects;
 @Component
 public class AuthServerAuthenticationGateway implements AuthenticationGateway, HttpClientUtils {
 
+    public static final String NAMESPACE_NAME = "AuthServer";
+
     private static final Logger log = LoggerFactory.getLogger(AuthServerAuthenticationGateway.class);
 
     private final WebClient webClient;
@@ -31,6 +34,7 @@ public class AuthServerAuthenticationGateway implements AuthenticationGateway, H
         this.tokenUri = Objects.requireNonNull(authServerProperties.getTokenUri());
     }
 
+    @Retry(name = NAMESPACE_NAME)
     @Override
     public AuthenticationResult login(final ClientCredentialsInput input) {
         log.debug("Creating client credentials [clientId:{}]", input.clientId());
@@ -57,7 +61,7 @@ public class AuthServerAuthenticationGateway implements AuthenticationGateway, H
 
     @Override
     public String namespace() {
-        return "AuthServer";
+        return NAMESPACE_NAME;
     }
 
     @Override
