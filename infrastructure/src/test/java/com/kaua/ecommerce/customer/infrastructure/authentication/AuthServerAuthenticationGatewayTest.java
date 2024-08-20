@@ -59,5 +59,10 @@ class AuthServerAuthenticationGatewayTest extends AbstractRestClientTest {
                 () -> this.gateway.login(aInput));
 
         Assertions.assertEquals(expectedErrorMessage, aException.getMessage());
+
+        verify(5, postRequestedFor(urlPathEqualTo("/api/oauth2/token"))
+                .withHeader(HttpHeaders.ACCEPT, equalTo(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader(HttpHeaders.CONTENT_TYPE, equalTo(MediaType.APPLICATION_FORM_URLENCODED_VALUE + ";charset=UTF-8"))
+                .withRequestBody(equalTo("grant_type=client_credentials")));
     }
 }
