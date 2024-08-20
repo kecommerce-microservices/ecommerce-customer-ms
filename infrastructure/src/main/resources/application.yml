@@ -124,6 +124,10 @@ resilience4j.retry:
         - org.springframework.web.reactive.function.client.WebClientResponseException.ServiceUnavailable
         - java.io.IOException
         - java.net.SocketTimeoutException
+    authServerConfig:
+      maxAttempts: 5
   instances:
     users:
       baseConfig: default
+    AuthServer:
+      baseConfig: authServerConfig
