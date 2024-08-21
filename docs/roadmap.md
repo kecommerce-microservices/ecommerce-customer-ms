@@ -1,2 +1,0 @@
-- [X] Implementar mecanismo de retry para criar o idp user
-- [x] Implementar mecanismo de compensação para deletar o idp user caso o customer não seja salvo no database
