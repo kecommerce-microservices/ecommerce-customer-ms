@@ -12,7 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
-public class DeleteIdpUserUseCaseTest extends UseCaseTest {
+class DeleteIdpUserUseCaseTest extends UseCaseTest {
 
     @Mock
     private IdentityProviderGateway identityProviderGateway;
