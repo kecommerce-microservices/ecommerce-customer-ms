@@ -351,4 +351,51 @@ class AuthServerIdentityProviderClientTest extends AbstractRestClientTest {
                         aUser.getPassword()
                 ))));
     }
+
+    @Test
+    void givenAValidUserId_whenCallDelete_shouldSucceed() {
+        final var aUserId = new UserId(IdentifierUtils.generateNewUUID());
+
+        final var aAccessToken = "accessToken";
+
+        Mockito.doReturn(aAccessToken).when(getClientCredentials).retrieve();
+
+        stubFor(
+                delete("/api/v1/users/delete/" + aUserId.value())
+                        .willReturn(aResponse()
+                                .withStatus(204))
+        );
+
+        Assertions.assertDoesNotThrow(() -> this.client.deleteOfUserId(aUserId));
+
+        verify(1, deleteRequestedFor(urlEqualTo("/api/v1/users/delete/%s".formatted(aUserId.value().toString())))
+                .withHeader(HttpHeaders.AUTHORIZATION, equalTo("Bearer " + aAccessToken)));
+    }
+
+    @Test
+    void givenAValidUserId_whenCallDeleteButTimeoutExceeded_shouldThrowInternalErrorException() {
+        final var aUserId = new UserId(IdentifierUtils.generateNewUUID());
+
+        final var aAccessToken = "accessToken";
+
+        final var expectedErrorMessage = "Timeout error observed from users [resourceId:%s]"
+                .formatted(aUserId.value().toString());
+
+        Mockito.doReturn(aAccessToken).when(getClientCredentials).retrieve();
+
+        stubFor(
+                delete("/api/v1/users/delete/" + aUserId.value())
+                        .willReturn(aResponse()
+                                .withStatus(204)
+                                .withFixedDelay(1020))
+        );
+
+        final var aException = Assertions.assertThrows(InternalErrorException.class,
+                () -> this.client.deleteOfUserId(aUserId));
+
+        Assertions.assertEquals(expectedErrorMessage, aException.getMessage());
+
+        verify(2, deleteRequestedFor(urlEqualTo("/api/v1/users/delete/%s".formatted(aUserId.value().toString())))
+                .withHeader(HttpHeaders.AUTHORIZATION, equalTo("Bearer " + aAccessToken)));
+    }
 }
