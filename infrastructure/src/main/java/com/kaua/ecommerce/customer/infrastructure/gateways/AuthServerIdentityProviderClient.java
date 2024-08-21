@@ -29,6 +29,7 @@ public class AuthServerIdentityProviderClient implements IdentityProviderGateway
 
     private static final Logger log = LoggerFactory.getLogger(AuthServerIdentityProviderClient.class);
     private static final String CREATE_USER_ACTION = "creating user";
+    private static final String DELETE_USER_ACTION = "deleting user";
 
     private final String userUrl;
     private final WebClient webClient;
@@ -77,6 +78,28 @@ public class AuthServerIdentityProviderClient implements IdentityProviderGateway
         log.info("User created in AuthServer [customerId:{}] [userId:{}]", aCustomerId, aOutput.userId);
 
         return new UserId(UUID.fromString(aOutput.userId));
+    }
+
+    // O certo seria termos o bulkhead e circuit breaker também, assim não sobrecarregamos o AuthServer e evitamos que ele fique indisponível
+    // mas consequentemente teríamos que tratar os erros que podem ocorrer por causa disso e uma forma de excluir o user do banco de dados
+    @Retry(name = NAMESPACE_NAME)
+    @Override
+    public void deleteOfUserId(final UserId userId) {
+        final var aUserId = userId.value().toString();
+
+        log.info("Deleting user in AuthServer [userId:{}]", aUserId);
+
+        doDelete(aUserId, () -> webClient
+                .delete()
+                .uri(this.userUrl + "/delete/" + aUserId)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + getClientCredentials.retrieve())
+                .retrieve()
+                .onStatus(isBadRequest, badRequestHandler(aUserId, DELETE_USER_ACTION))
+                .onStatus(is5xx, a5xxHandler(aUserId, DELETE_USER_ACTION))
+                .bodyToMono(Void.class)
+                .block());
+
+        log.info("User deleted in AuthServer [userId:{}]", aUserId);
     }
 
     @Override

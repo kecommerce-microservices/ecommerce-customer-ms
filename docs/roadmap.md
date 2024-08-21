@@ -1,3 +1,0 @@
-- [ ] Implementar mecanismo de retry para criar o idp user
-- [ ] Implementar mecanismo de retry para salvar o customer no database talvez
-- [ ] Implementar mecanismo de compensação para deletar o idp user caso o customer não seja salvo no database
