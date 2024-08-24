@@ -37,7 +37,7 @@ public class Customer extends AggregateRoot<CustomerId> {
         this.setName(aName);
         this.setDocument(aDocument);
         this.createdAt = aCreatedAt;
-        this.updatedAt = aUpdatedAt;
+        this.setUpdatedAt(aUpdatedAt);
     }
 
     public static Customer newCustomer(
@@ -61,6 +61,12 @@ public class Customer extends AggregateRoot<CustomerId> {
             final Instant aUpdatedAt
     ) {
         return new Customer(aCustomerId, aVersion, aUserId, aEmail, aName, aDocument, aCreatedAt, aUpdatedAt);
+    }
+
+    public Customer updateDocument(final Document aDocument) {
+        this.setDocument(aDocument);
+        this.setUpdatedAt(InstantUtils.now());
+        return this;
     }
 
     public UserId getUserId() {
@@ -101,6 +107,10 @@ public class Customer extends AggregateRoot<CustomerId> {
 
     private void setDocument(final Document document) {
         this.document = document;
+    }
+
+    private void setUpdatedAt(final Instant updatedAt) {
+        this.updatedAt = this.assertArgumentNotNull(updatedAt, "updatedAt", SHOULD_NOT_BE_NULL);
     }
 
     @Override
