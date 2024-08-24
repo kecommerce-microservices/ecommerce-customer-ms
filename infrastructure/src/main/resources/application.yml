@@ -62,6 +62,12 @@ spring:
           batch_size: 10
         order_inserts: true
         order_updates: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${auth-server.host}/oauth2/jwks
+          issuer-uri: ${auth-server.host}
 
 resilience4j.bulkhead:
   configs:
