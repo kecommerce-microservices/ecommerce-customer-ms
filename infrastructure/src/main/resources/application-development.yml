@@ -1,9 +1,10 @@
 auth-server:
+  host: http://localhost:8080
   client-id: ecommerce-microservices
   client-secret: 123456
 
 web-client:
-  auth-server-url: http://localhost:8080
+  auth-server-url: "${auth-server.host}"
 
 server:
   undertow:
