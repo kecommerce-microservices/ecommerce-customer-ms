@@ -1,7 +1,9 @@
 package com.kaua.ecommerce.customer.domain;
 
+import com.kaua.ecommerce.customer.domain.customer.Customer;
 import com.kaua.ecommerce.customer.domain.customer.CustomerId;
 import com.kaua.ecommerce.customer.domain.customer.idp.User;
+import com.kaua.ecommerce.customer.domain.customer.idp.UserId;
 import com.kaua.ecommerce.customer.domain.person.Email;
 import com.kaua.ecommerce.customer.domain.person.Name;
 import com.kaua.ecommerce.lib.domain.utils.IdentifierUtils;
@@ -15,13 +17,13 @@ public final class Fixture {
     private Fixture() {
     }
 
+    public static String email() {
+        return faker.internet().emailAddress();
+    }
+
     public static final class IdpUsers {
 
         private IdpUsers() {
-        }
-
-        public static String email() {
-            return faker.internet().emailAddress();
         }
 
         public static User withoutUserId(final CustomerId aCustomerId) {
@@ -59,6 +61,30 @@ public final class Fixture {
                     new Name(aFirstNameValid, aLastNameValid),
                     new Email(email()),
                     "123456Ab*"
+            );
+        }
+    }
+
+    public static final class Customers {
+        private Customers() {
+        }
+
+        public static Customer newCustomer() {
+            final var aFirstName = faker.name().firstName();
+            final var aFirstNameValid = aFirstName.length() < 3
+                    ? aFirstName + RandomStringUtils.generateValue(3 - aFirstName.length())
+                    : aFirstName;
+
+            final var aLastName = faker.name().lastName();
+            final var aLastNameValid = aLastName.length() < 3
+                    ? aLastName + RandomStringUtils.generateValue(3 - aLastName.length())
+                    : aLastName;
+
+            return Customer.newCustomer(
+                    new CustomerId(IdentifierUtils.generateNewUUID()),
+                    new UserId(IdentifierUtils.generateNewUUID()),
+                    new Email(email()),
+                    new Name(aFirstNameValid, aLastNameValid)
             );
         }
     }
