@@ -5,9 +5,11 @@ import com.kaua.ecommerce.customer.application.repositories.CustomerRepository;
 import com.kaua.ecommerce.customer.application.usecases.customer.CreateCustomerUseCase;
 import com.kaua.ecommerce.customer.application.usecases.customer.CreateIdpUserUseCase;
 import com.kaua.ecommerce.customer.application.usecases.customer.DeleteIdpUserUseCase;
+import com.kaua.ecommerce.customer.application.usecases.customer.UpdateCustomerDocumentUseCase;
 import com.kaua.ecommerce.customer.application.usecases.customer.impl.DefaultCreateCustomerUseCase;
 import com.kaua.ecommerce.customer.application.usecases.customer.impl.DefaultCreateIdpUserUseCase;
 import com.kaua.ecommerce.customer.application.usecases.customer.impl.DefaultDeleteIdpUserUseCase;
+import com.kaua.ecommerce.customer.application.usecases.customer.impl.DefaultUpdateCustomerDocumentUseCase;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -27,5 +29,10 @@ public class CustomerUseCaseConfig {
     @Bean
     public DeleteIdpUserUseCase deleteIdpUserUseCase(final IdentityProviderGateway identityProviderGateway) {
         return new DefaultDeleteIdpUserUseCase(identityProviderGateway);
+    }
+
+    @Bean
+    public UpdateCustomerDocumentUseCase updateCustomerDocumentUseCase(final CustomerRepository customerRepository) {
+        return new DefaultUpdateCustomerDocumentUseCase(customerRepository);
     }
 }
