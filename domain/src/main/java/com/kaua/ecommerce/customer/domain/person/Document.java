@@ -17,11 +17,11 @@ public sealed interface Document extends ValueObject {
     }
 
     record Cpf(String value) implements Document {
-        public static final String DOCUMENT_TYPE = "cpf";
+        public static final String DOCUMENT_TYPE = "CPF";
 
         public Cpf {
-            this.assertArgumentNotEmpty(value, "cpf", "should not be empty");
-            this.assertConditionTrue(CpfUtils.validateCpf(value), "cpf", "should be valid");
+            this.assertArgumentNotEmpty(value, "CPF", "should not be empty");
+            this.assertConditionTrue(CpfUtils.validateCpf(value), "CPF", "should be valid");
         }
 
         @Override
@@ -36,11 +36,11 @@ public sealed interface Document extends ValueObject {
     }
 
     record Cnpj(String value) implements Document {
-        public static final String DOCUMENT_TYPE = "cnpj";
+        public static final String DOCUMENT_TYPE = "CNPJ";
 
         public Cnpj {
-            this.assertArgumentNotEmpty(value, "cnpj", "should not be empty");
-            this.assertConditionTrue(CnpjUtils.validateCnpj(value), "cnpj", "should be valid");
+            this.assertArgumentNotEmpty(value, "CNPJ", "should not be empty");
+            this.assertConditionTrue(CnpjUtils.validateCnpj(value), "CNPJ", "should be valid");
         }
 
         @Override
