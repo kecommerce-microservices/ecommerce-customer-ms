@@ -6,6 +6,7 @@ import com.kaua.ecommerce.lib.domain.exceptions.DomainException;
 import com.kaua.ecommerce.lib.domain.exceptions.InternalErrorException;
 import com.kaua.ecommerce.lib.domain.exceptions.NotFoundException;
 import com.kaua.ecommerce.lib.domain.exceptions.ValidationException;
+import com.kaua.ecommerce.lib.infrastructure.exceptions.ConflictException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -43,6 +44,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiError> handleUseCaseInputCannotBeNullException(final UseCaseInputCannotBeNullException ex) {
         log.error("Handling use case input cannot be null exception: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiError.from(ex.getMessage()));
+    }
+
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<ApiError> handleConflictException(final ConflictException ex) {
+        log.debug("Handling conflict exception: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(ApiError.from(ex.getMessage()));
     }
 
