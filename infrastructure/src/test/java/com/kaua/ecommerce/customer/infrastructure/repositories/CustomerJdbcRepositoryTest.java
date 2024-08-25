@@ -142,8 +142,10 @@ class CustomerJdbcRepositoryTest extends AbstractRepositoryTest {
 
         aCustomerUpdated.setVersion(2);
 
+        final var aCustomerRepositoryVariable = this.customerRepository(); // Variable to use in lambda, because this.customerRepository() is not allowed in lambda
+        // this is a way to test if the exception is thrown, THIS IS A SCAM, in future disable this rule in sonar
         final var aException = Assertions.assertThrows(ConflictException.class,
-                () -> this.customerRepository().save(aCustomerUpdated));
+                () -> aCustomerRepositoryVariable.save(aCustomerUpdated));
 
         Assertions.assertEquals(expectedErrorMessage, aException.getMessage());
     }
