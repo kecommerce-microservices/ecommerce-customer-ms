@@ -26,6 +26,8 @@ public class CustomerJdbcRepository implements CustomerRepository {
 
     private static final Logger log = LoggerFactory.getLogger(CustomerJdbcRepository.class);
 
+    private static final String EMAIL_COLUMN = "email";
+
     private final DatabaseClient databaseClient;
 
     public CustomerJdbcRepository(final DatabaseClient databaseClient) {
@@ -40,7 +42,7 @@ public class CustomerJdbcRepository implements CustomerRepository {
     @Override
     public boolean existsByEmail(final String email) {
         final var aSql = "SELECT COUNT(*) FROM customers WHERE email = :email";
-        return this.databaseClient.count(aSql, Map.of("email", email)) > 0;
+        return this.databaseClient.count(aSql, Map.of(EMAIL_COLUMN, email)) > 0;
     }
 
     @Override
@@ -106,7 +108,7 @@ public class CustomerJdbcRepository implements CustomerRepository {
         aParams.put("id", aCustomer.getId().value());
         aParams.put("version", aCustomer.getVersion());
         aParams.put("idpUserId", aCustomer.getUserId().value());
-        aParams.put("email", aCustomer.getEmail().value());
+        aParams.put(EMAIL_COLUMN, aCustomer.getEmail().value());
         aParams.put("firstName", aCustomer.getName().firstName());
         aParams.put("lastName", aCustomer.getName().lastName());
         aParams.put("documentNumber", aCustomer.getDocument().map(Document::value).orElse(null));
@@ -124,7 +126,7 @@ public class CustomerJdbcRepository implements CustomerRepository {
                     new CustomerId(UUID.fromString(rs.getString("id"))),
                     rs.getLong("version"),
                     new UserId(UUID.fromString(rs.getString("idp_user_id"))),
-                    new Email(rs.getString("email")),
+                    new Email(rs.getString(EMAIL_COLUMN)),
                     new Name(rs.getString("first_name"), rs.getString("last_name")),
                     aDocumentType != null ?
                             Document.create(rs.getString("document_number"), aDocumentType) : null,
