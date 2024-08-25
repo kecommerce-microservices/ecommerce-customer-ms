@@ -1,10 +1,15 @@
 package com.kaua.ecommerce.customer.infrastructure.rest;
 
 import com.kaua.ecommerce.customer.ControllerTest;
+import com.kaua.ecommerce.customer.application.usecases.customer.UpdateCustomerDocumentUseCase;
+import com.kaua.ecommerce.customer.application.usecases.customer.inputs.UpdateCustomerDocumentInput;
+import com.kaua.ecommerce.customer.application.usecases.customer.outputs.UpdateCustomerDocumentOutput;
 import com.kaua.ecommerce.customer.infrastructure.mediator.SignUpMediator;
 import com.kaua.ecommerce.customer.infrastructure.rest.controllers.CustomerRestController;
-import com.kaua.ecommerce.customer.infrastructure.rest.req.CreateCustomerRequest;
+import com.kaua.ecommerce.customer.infrastructure.rest.req.SignUpRequest;
 import com.kaua.ecommerce.customer.infrastructure.rest.res.SignUpResponse;
+import com.kaua.ecommerce.lib.domain.utils.IdentifierUtils;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -16,6 +21,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
+import java.util.UUID;
+
+import static com.kaua.ecommerce.customer.ApiTest.admin;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -29,8 +37,14 @@ class CustomerRestApiTest {
     @MockBean
     private SignUpMediator signUpMediator;
 
+    @MockBean
+    private UpdateCustomerDocumentUseCase updateCustomerDocumentUseCase;
+
     @Captor
-    private ArgumentCaptor<CreateCustomerRequest> createCustomerRequestCaptor;
+    private ArgumentCaptor<SignUpRequest> signUpRequestCaptor;
+
+    @Captor
+    private ArgumentCaptor<UpdateCustomerDocumentInput> updateCustomerDocumentInputCaptor;
 
     @Test
     void givenAValidInput_whenSignUp_thenReturnCustomerIdAndUserId() throws Exception {
@@ -54,7 +68,7 @@ class CustomerRestApiTest {
                 }
                 """.formatted(aFirstName, aLastName, aEmail, aPassword);
 
-        final var aRequest = MockMvcRequestBuilders.post("/v1/customers")
+        final var aRequest = MockMvcRequestBuilders.post("/v1/customers/signup")
                 .accept(MediaType.APPLICATION_JSON_VALUE)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .content(json);
@@ -68,6 +82,15 @@ class CustomerRestApiTest {
                 .andExpect(header().string("Content-Type", MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.customer_id").value(expectedCustomerId))
                 .andExpect(jsonPath("$.idp_user_id").value(expectedUserId));
+
+        Mockito.verify(signUpMediator, Mockito.times(1)).signUp(signUpRequestCaptor.capture());
+
+        final var signUpRequest = signUpRequestCaptor.getValue();
+
+        Assertions.assertEquals(aFirstName, signUpRequest.firstName());
+        Assertions.assertEquals(aLastName, signUpRequest.lastName());
+        Assertions.assertEquals(aEmail, signUpRequest.email());
+        Assertions.assertEquals(aPassword, signUpRequest.password());
     }
 
     @Test
@@ -86,7 +109,7 @@ class CustomerRestApiTest {
                 }
                 """.formatted(aFirstName, aLastName, aEmail, aPassword);
 
-        final var aRequest = MockMvcRequestBuilders.post("/v1/customers")
+        final var aRequest = MockMvcRequestBuilders.post("/v1/customers/signup")
                 .accept(MediaType.APPLICATION_JSON_VALUE)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .content(json);
@@ -100,5 +123,46 @@ class CustomerRestApiTest {
                 .andExpect(jsonPath("$.errors", hasSize(1)))
                 .andExpect(jsonPath("$.errors[0].property").value("firstName"))
                 .andExpect(jsonPath("$.errors[0].message").value("should not be empty"));
+    }
+
+    @Test
+    void givenAValidInput_whenUpdateDocument_thenReturnDocumentUpdated() throws Exception {
+        final var aDocumentNumber = "123456789";
+        final var aDocumentType = "CPF";
+
+        final var expectedCustomerId = IdentifierUtils.generateNewId();
+
+        Mockito.when(updateCustomerDocumentUseCase.execute(any()))
+                .thenReturn(new UpdateCustomerDocumentOutput(expectedCustomerId, aDocumentType));
+
+        var json = """
+                {
+                    "document_number": "%s",
+                    "document_type": "%s"
+                }
+                """.formatted(aDocumentNumber, aDocumentType);
+
+        final var aRequest = MockMvcRequestBuilders.patch("/v1/customers/document")
+                .with(admin(IdentifierUtils.generateNewUUID(), UUID.fromString(expectedCustomerId)))
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(json);
+
+        final var aResponse = this.mvc.perform(aRequest);
+
+        aResponse
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andExpect(header().string("Content-Type", MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.customer_id").value(expectedCustomerId))
+                .andExpect(jsonPath("$.document_type").value(aDocumentType));
+
+        Mockito.verify(updateCustomerDocumentUseCase, Mockito.times(1)).execute(updateCustomerDocumentInputCaptor.capture());
+
+        final var updateCustomerDocumentInput = updateCustomerDocumentInputCaptor.getValue();
+
+        Assertions.assertEquals(expectedCustomerId, updateCustomerDocumentInput.customerId().toString());
+        Assertions.assertEquals(aDocumentNumber, updateCustomerDocumentInput.documentNumber());
+        Assertions.assertEquals(aDocumentType, updateCustomerDocumentInput.documentType());
     }
 }

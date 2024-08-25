@@ -5,6 +5,7 @@
 - [X] Adicionado o retry para o refresh do access token do identity provider
 - [X] Adicionado o retry, bulkhead e circuit breaker para a criação do IDP user
 - [x] Adicionado a compensação para deletar o IDP user caso o customer não seja salvo no database
+- [X] Adicionado a atualização do documento do customer
 
 # 0.1.0
 - [X] Adicionado o setup inicial do projeto

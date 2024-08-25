@@ -1,9 +1,10 @@
 auth-server:
+  host: "http://localhost:${wiremock.server.port:8001}"
   client-id: testes
   client-secret: 123456
 
 web-client:
-  auth-server-url: "http://localhost:${wiremock.server.port:8001}"
+  auth-server-url: "${auth-server.host}"
   users:
     read-timeout: 1000
     connect-timeout: 1000

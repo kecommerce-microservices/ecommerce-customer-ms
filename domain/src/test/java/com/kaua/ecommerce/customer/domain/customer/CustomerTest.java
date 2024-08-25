@@ -2,6 +2,7 @@ package com.kaua.ecommerce.customer.domain.customer;
 
 import com.kaua.ecommerce.customer.domain.UnitTest;
 import com.kaua.ecommerce.customer.domain.customer.idp.UserId;
+import com.kaua.ecommerce.customer.domain.person.Document;
 import com.kaua.ecommerce.customer.domain.person.DocumentFactory;
 import com.kaua.ecommerce.customer.domain.person.Email;
 import com.kaua.ecommerce.customer.domain.person.Name;
@@ -94,5 +95,28 @@ class CustomerTest extends UnitTest {
         Assertions.assertTrue(aCustomerString.contains("createdAt=" + aNow));
         Assertions.assertTrue(aCustomerString.contains("updatedAt=" + aNow));
         Assertions.assertTrue(aCustomerString.contains("version=" + aVersion));
+    }
+
+    @Test
+    void givenAValidDocument_whenCallUpdateDocument_thenDocumentShouldBeUpdated() {
+        final var aCustomerId = new CustomerId(IdentifierUtils.generateNewUUID());
+        final var aUserId = new UserId(IdentifierUtils.generateNewUUID());
+        final var aName = new Name("John", "Doe");
+        final var aEmail = new Email("testes@sess.com");
+        final var aDocument = Document.create("47999381004", "cpf");
+
+        final var aCustomer = Customer.newCustomer(aCustomerId, aUserId, aEmail, aName);
+        final var aCustomerUpdatedAt = aCustomer.getUpdatedAt();
+
+        final var aCustomerUpdated = aCustomer.updateDocument(aDocument);
+
+        Assertions.assertNotNull(aCustomerUpdated);
+        Assertions.assertEquals(aCustomerId, aCustomerUpdated.getId());
+        Assertions.assertEquals(aUserId, aCustomerUpdated.getUserId());
+        Assertions.assertEquals(aName, aCustomerUpdated.getName());
+        Assertions.assertEquals(aEmail, aCustomerUpdated.getEmail());
+        Assertions.assertEquals(aDocument, aCustomerUpdated.getDocument().get());
+        Assertions.assertEquals(aCustomerUpdatedAt, aCustomer.getCreatedAt());
+        Assertions.assertTrue(aCustomerUpdatedAt.isBefore(aCustomerUpdated.getUpdatedAt()));
     }
 }
