@@ -5,7 +5,9 @@ import com.kaua.ecommerce.customer.application.exceptions.UseCaseInputCannotBeNu
 import com.kaua.ecommerce.customer.application.repositories.CustomerRepository;
 import com.kaua.ecommerce.customer.application.usecases.customer.impl.DefaultUpdateCustomerDocumentUseCase;
 import com.kaua.ecommerce.customer.application.usecases.customer.inputs.UpdateCustomerDocumentInput;
+import com.kaua.ecommerce.customer.application.usecases.customer.outputs.UpdateCustomerDocumentOutput;
 import com.kaua.ecommerce.customer.domain.Fixture;
+import com.kaua.ecommerce.lib.domain.exceptions.InternalErrorException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -124,5 +126,17 @@ class UpdateCustomerDocumentUseCaseTest extends UseCaseTest {
 
         Mockito.verify(customerRepository, Mockito.times(0)).customerOfId(aCustomerId);
         Mockito.verify(customerRepository, Mockito.times(0)).save(Mockito.any());
+    }
+
+    @Test
+    void givenAnInvalidNullDocument_whenCallNewUpdateCustomerDocumentOutput_thenShouldThrowInternalErrorException() {
+        final var aCustomer = Fixture.Customers.newCustomer();
+
+        final var expectedErrorMessage = "On creating UpdateCustomerDocumentOutput, document type is null";
+
+        final var aException = Assertions.assertThrows(InternalErrorException.class,
+                () -> new UpdateCustomerDocumentOutput(aCustomer));
+
+        Assertions.assertEquals(expectedErrorMessage, aException.getMessage());
     }
 }
