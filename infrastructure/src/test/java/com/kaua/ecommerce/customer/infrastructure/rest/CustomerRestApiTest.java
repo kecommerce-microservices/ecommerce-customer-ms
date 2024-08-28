@@ -2,8 +2,11 @@ package com.kaua.ecommerce.customer.infrastructure.rest;
 
 import com.kaua.ecommerce.customer.ControllerTest;
 import com.kaua.ecommerce.customer.application.usecases.customer.UpdateCustomerDocumentUseCase;
+import com.kaua.ecommerce.customer.application.usecases.customer.UpdateCustomerTelephoneUseCase;
 import com.kaua.ecommerce.customer.application.usecases.customer.inputs.UpdateCustomerDocumentInput;
+import com.kaua.ecommerce.customer.application.usecases.customer.inputs.UpdateCustomerTelephoneInput;
 import com.kaua.ecommerce.customer.application.usecases.customer.outputs.UpdateCustomerDocumentOutput;
+import com.kaua.ecommerce.customer.application.usecases.customer.outputs.UpdateCustomerTelephoneOutput;
 import com.kaua.ecommerce.customer.infrastructure.mediator.SignUpMediator;
 import com.kaua.ecommerce.customer.infrastructure.rest.controllers.CustomerRestController;
 import com.kaua.ecommerce.customer.infrastructure.rest.req.SignUpRequest;
@@ -40,11 +43,17 @@ class CustomerRestApiTest {
     @MockBean
     private UpdateCustomerDocumentUseCase updateCustomerDocumentUseCase;
 
+    @MockBean
+    private UpdateCustomerTelephoneUseCase updateCustomerTelephoneUseCase;
+
     @Captor
     private ArgumentCaptor<SignUpRequest> signUpRequestCaptor;
 
     @Captor
     private ArgumentCaptor<UpdateCustomerDocumentInput> updateCustomerDocumentInputCaptor;
+
+    @Captor
+    private ArgumentCaptor<UpdateCustomerTelephoneInput> updateCustomerTelephoneInputCaptor;
 
     @Test
     void givenAValidInput_whenSignUp_thenReturnCustomerIdAndUserId() throws Exception {
@@ -164,5 +173,43 @@ class CustomerRestApiTest {
         Assertions.assertEquals(expectedCustomerId, updateCustomerDocumentInput.customerId().toString());
         Assertions.assertEquals(aDocumentNumber, updateCustomerDocumentInput.documentNumber());
         Assertions.assertEquals(aDocumentType, updateCustomerDocumentInput.documentType());
+    }
+
+    @Test
+    void givenAValidInput_whenUpdateTelephone_thenReturnTelephoneUpdated() throws Exception {
+        final var aPhoneNumber = "+5511999999999";
+
+        final var expectedCustomerId = IdentifierUtils.generateNewId();
+
+        Mockito.when(updateCustomerTelephoneUseCase.execute(any()))
+                .thenReturn(new UpdateCustomerTelephoneOutput(expectedCustomerId, aPhoneNumber));
+
+        var json = """
+                {
+                    "phone_number": "%s"
+                }
+                """.formatted(aPhoneNumber);
+
+        final var aRequest = MockMvcRequestBuilders.patch("/v1/customers/telephone")
+                .with(admin(IdentifierUtils.generateNewUUID(), UUID.fromString(expectedCustomerId)))
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(json);
+
+        final var aResponse = this.mvc.perform(aRequest);
+
+        aResponse
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andExpect(header().string("Content-Type", MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.customer_id").value(expectedCustomerId))
+                .andExpect(jsonPath("$.telephone").value(aPhoneNumber));
+
+        Mockito.verify(updateCustomerTelephoneUseCase, Mockito.times(1)).execute(updateCustomerTelephoneInputCaptor.capture());
+
+        final var updateCustomerTelephoneInput = updateCustomerTelephoneInputCaptor.getValue();
+
+        Assertions.assertEquals(expectedCustomerId, updateCustomerTelephoneInput.customerId().toString());
+        Assertions.assertEquals(aPhoneNumber, updateCustomerTelephoneInput.telephone());
     }
 }
