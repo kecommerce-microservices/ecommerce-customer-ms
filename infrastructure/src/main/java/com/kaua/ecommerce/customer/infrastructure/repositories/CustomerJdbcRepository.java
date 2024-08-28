@@ -7,6 +7,7 @@ import com.kaua.ecommerce.customer.domain.customer.idp.UserId;
 import com.kaua.ecommerce.customer.domain.person.Document;
 import com.kaua.ecommerce.customer.domain.person.Email;
 import com.kaua.ecommerce.customer.domain.person.Name;
+import com.kaua.ecommerce.customer.domain.person.Telephone;
 import com.kaua.ecommerce.customer.infrastructure.jdbc.DatabaseClient;
 import com.kaua.ecommerce.customer.infrastructure.jdbc.JdbcUtils;
 import com.kaua.ecommerce.customer.infrastructure.jdbc.RowMap;
@@ -77,8 +78,8 @@ public class CustomerJdbcRepository implements CustomerRepository {
 
     private void create(final Customer aCustomer) {
         final var aSql = """
-                INSERT INTO customers (id, version, idp_user_id, email, first_name, last_name, document_number, document_type, created_at, updated_at)
-                VALUES (:id, (:version + 1), :idpUserId, :email, :firstName, :lastName, :documentNumber, :documentType, :createdAt, :updatedAt)
+                INSERT INTO customers (id, version, idp_user_id, email, first_name, last_name, document_number, document_type, phone_number, created_at, updated_at)
+                VALUES (:id, (:version + 1), :idpUserId, :email, :firstName, :lastName, :documentNumber, :documentType, :phoneNumber, :createdAt, :updatedAt)
                 """;
         executeUpdate(aSql, aCustomer);
     }
@@ -94,6 +95,7 @@ public class CustomerJdbcRepository implements CustomerRepository {
                     last_name = :lastName,
                     document_number = :documentNumber,
                     document_type = :documentType,
+                    phone_number = :phoneNumber,
                     updated_at = :updatedAt
                 WHERE id = :id AND version = :version
                 """;
@@ -113,6 +115,7 @@ public class CustomerJdbcRepository implements CustomerRepository {
         aParams.put("lastName", aCustomer.getName().lastName());
         aParams.put("documentNumber", aCustomer.getDocument().map(Document::value).orElse(null));
         aParams.put("documentType", aCustomer.getDocument().map(Document::type).orElse(null));
+        aParams.put("phoneNumber", aCustomer.getTelephone().map(Telephone::value).orElse(null));
         aParams.put("createdAt", Timestamp.from(aCustomer.getCreatedAt()));
         aParams.put("updatedAt", Timestamp.from(aCustomer.getUpdatedAt()));
 
@@ -122,6 +125,7 @@ public class CustomerJdbcRepository implements CustomerRepository {
     private RowMap<Customer> customerMapper() {
         return rs -> {
             final var aDocumentType = rs.getString("document_type");
+            final var aPhoneNumber = rs.getString("phone_number");
             return Customer.with(
                     new CustomerId(UUID.fromString(rs.getString("id"))),
                     rs.getLong("version"),
@@ -130,6 +134,7 @@ public class CustomerJdbcRepository implements CustomerRepository {
                     new Name(rs.getString("first_name"), rs.getString("last_name")),
                     aDocumentType != null ?
                             Document.create(rs.getString("document_number"), aDocumentType) : null,
+                    aPhoneNumber != null ? new Telephone(aPhoneNumber) : null,
                     JdbcUtils.getInstant(rs, "created_at"),
                     JdbcUtils.getInstant(rs, "updated_at")
             );

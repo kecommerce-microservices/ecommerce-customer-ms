@@ -6,6 +6,7 @@
 - [X] Adicionado o retry, bulkhead e circuit breaker para a criação do IDP user
 - [x] Adicionado a compensação para deletar o IDP user caso o customer não seja salvo no database
 - [X] Adicionado a atualização do documento do customer
+- [X] Adicionado a atualização do telefone do customer
 
 # 0.1.0
 - [X] Adicionado o setup inicial do projeto

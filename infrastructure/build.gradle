@@ -41,6 +41,8 @@ dependencies {
 
     implementation 'com.kaua.ecommerce.common-lib.infrastructure:infrastructure:0.6.1'
 
+    implementation 'com.googlecode.libphonenumber:libphonenumber:8.13.44'
+
     implementation 'io.github.resilience4j:resilience4j-spring-boot3'
     implementation 'io.github.resilience4j:resilience4j-retry'
     implementation 'io.github.resilience4j:resilience4j-bulkhead'
