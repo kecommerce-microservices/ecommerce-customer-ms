@@ -7,6 +7,7 @@ import com.kaua.ecommerce.customer.domain.customer.idp.UserId;
 import com.kaua.ecommerce.customer.domain.person.Document;
 import com.kaua.ecommerce.customer.domain.person.Email;
 import com.kaua.ecommerce.customer.domain.person.Name;
+import com.kaua.ecommerce.customer.domain.person.Telephone;
 import com.kaua.ecommerce.lib.domain.utils.IdentifierUtils;
 import com.kaua.ecommerce.lib.infrastructure.exceptions.ConflictException;
 import org.junit.jupiter.api.Assertions;
@@ -176,6 +177,7 @@ class CustomerJdbcRepositoryTest extends AbstractRepositoryTest {
 
         final var aCustomer = Fixture.Customers.newCustomer();
         aCustomer.updateDocument(Document.create("175.105.270-23", "CPF"));
+        aCustomer.updateTelephone(new Telephone("+5511999999999"));
         this.customerRepository().save(aCustomer);
 
         Assertions.assertEquals(1, countCustomers());
@@ -187,6 +189,7 @@ class CustomerJdbcRepositoryTest extends AbstractRepositoryTest {
         Assertions.assertEquals(aCustomer.getName(), aActualResponse.getName());
         Assertions.assertEquals(aCustomer.getEmail(), aActualResponse.getEmail());
         Assertions.assertEquals(aCustomer.getDocument().get(), aActualResponse.getDocument().get());
+        Assertions.assertEquals(aCustomer.getTelephone().get(), aActualResponse.getTelephone().get());
         Assertions.assertEquals(aCustomer.getCreatedAt(), aActualResponse.getCreatedAt());
         Assertions.assertEquals(aCustomer.getUpdatedAt(), aActualResponse.getUpdatedAt());
     }
