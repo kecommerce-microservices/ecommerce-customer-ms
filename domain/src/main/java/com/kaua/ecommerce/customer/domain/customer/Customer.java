@@ -4,6 +4,7 @@ import com.kaua.ecommerce.customer.domain.customer.idp.UserId;
 import com.kaua.ecommerce.customer.domain.person.Document;
 import com.kaua.ecommerce.customer.domain.person.Email;
 import com.kaua.ecommerce.customer.domain.person.Name;
+import com.kaua.ecommerce.customer.domain.person.Telephone;
 import com.kaua.ecommerce.lib.domain.AggregateRoot;
 import com.kaua.ecommerce.lib.domain.utils.InstantUtils;
 
@@ -18,6 +19,7 @@ public class Customer extends AggregateRoot<CustomerId> {
     private Email email;
     private Name name;
     private Document document;
+    private Telephone telephone;
     private final Instant createdAt;
     private Instant updatedAt;
 
@@ -28,6 +30,7 @@ public class Customer extends AggregateRoot<CustomerId> {
             final Email aEmail,
             final Name aName,
             final Document aDocument,
+            final Telephone aTelephone,
             final Instant aCreatedAt,
             final Instant aUpdatedAt
     ) {
@@ -36,6 +39,7 @@ public class Customer extends AggregateRoot<CustomerId> {
         this.setEmail(aEmail);
         this.setName(aName);
         this.setDocument(aDocument);
+        this.setTelephone(aTelephone);
         this.createdAt = aCreatedAt;
         this.setUpdatedAt(aUpdatedAt);
     }
@@ -47,7 +51,7 @@ public class Customer extends AggregateRoot<CustomerId> {
             final Name aName
     ) {
         final var aNow = InstantUtils.now();
-        return new Customer(aCustomerId, 0, aUserId, aEmail, aName, null, aNow, aNow);
+        return new Customer(aCustomerId, 0, aUserId, aEmail, aName, null, null, aNow, aNow);
     }
 
     public static Customer with(
@@ -57,14 +61,21 @@ public class Customer extends AggregateRoot<CustomerId> {
             final Email aEmail,
             final Name aName,
             final Document aDocument,
+            final Telephone aTelephone,
             final Instant aCreatedAt,
             final Instant aUpdatedAt
     ) {
-        return new Customer(aCustomerId, aVersion, aUserId, aEmail, aName, aDocument, aCreatedAt, aUpdatedAt);
+        return new Customer(aCustomerId, aVersion, aUserId, aEmail, aName, aDocument, aTelephone, aCreatedAt, aUpdatedAt);
     }
 
     public Customer updateDocument(final Document aDocument) {
         this.setDocument(aDocument);
+        this.setUpdatedAt(InstantUtils.now());
+        return this;
+    }
+
+    public Customer updateTelephone(final Telephone aTelephone) {
+        this.setTelephone(aTelephone);
         this.setUpdatedAt(InstantUtils.now());
         return this;
     }
@@ -83,6 +94,10 @@ public class Customer extends AggregateRoot<CustomerId> {
 
     public Optional<Document> getDocument() {
         return Optional.ofNullable(document);
+    }
+
+    public Optional<Telephone> getTelephone() {
+        return Optional.ofNullable(telephone);
     }
 
     public Instant getCreatedAt() {
@@ -109,6 +124,10 @@ public class Customer extends AggregateRoot<CustomerId> {
         this.document = document;
     }
 
+    private void setTelephone(final Telephone telephone) {
+        this.telephone = telephone;
+    }
+
     private void setUpdatedAt(final Instant updatedAt) {
         this.updatedAt = this.assertArgumentNotNull(updatedAt, "updatedAt", SHOULD_NOT_BE_NULL);
     }
@@ -121,6 +140,7 @@ public class Customer extends AggregateRoot<CustomerId> {
                 ", email=" + email.value() +
                 ", name=" + name.fullName() +
                 ", document=" + getDocument().map(Document::type).orElse(null) +
+                ", telephone=" + getTelephone().map(Telephone::value).orElse(null) +
                 ", createdAt=" + createdAt +
                 ", updatedAt=" + updatedAt +
                 ", version=" + getVersion() +
