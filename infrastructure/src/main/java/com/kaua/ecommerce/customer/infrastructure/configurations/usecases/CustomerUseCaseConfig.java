@@ -1,15 +1,10 @@
 package com.kaua.ecommerce.customer.infrastructure.configurations.usecases;
 
 import com.kaua.ecommerce.customer.application.gateways.IdentityProviderGateway;
+import com.kaua.ecommerce.customer.application.gateways.TelephoneGateway;
 import com.kaua.ecommerce.customer.application.repositories.CustomerRepository;
-import com.kaua.ecommerce.customer.application.usecases.customer.CreateCustomerUseCase;
-import com.kaua.ecommerce.customer.application.usecases.customer.CreateIdpUserUseCase;
-import com.kaua.ecommerce.customer.application.usecases.customer.DeleteIdpUserUseCase;
-import com.kaua.ecommerce.customer.application.usecases.customer.UpdateCustomerDocumentUseCase;
-import com.kaua.ecommerce.customer.application.usecases.customer.impl.DefaultCreateCustomerUseCase;
-import com.kaua.ecommerce.customer.application.usecases.customer.impl.DefaultCreateIdpUserUseCase;
-import com.kaua.ecommerce.customer.application.usecases.customer.impl.DefaultDeleteIdpUserUseCase;
-import com.kaua.ecommerce.customer.application.usecases.customer.impl.DefaultUpdateCustomerDocumentUseCase;
+import com.kaua.ecommerce.customer.application.usecases.customer.*;
+import com.kaua.ecommerce.customer.application.usecases.customer.impl.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -34,5 +29,10 @@ public class CustomerUseCaseConfig {
     @Bean
     public UpdateCustomerDocumentUseCase updateCustomerDocumentUseCase(final CustomerRepository customerRepository) {
         return new DefaultUpdateCustomerDocumentUseCase(customerRepository);
+    }
+
+    @Bean
+    public UpdateCustomerTelephoneUseCase updateCustomerTelephoneUseCase(final CustomerRepository customerRepository, final TelephoneGateway telephoneGateway) {
+        return new DefaultUpdateCustomerTelephoneUseCase(customerRepository, telephoneGateway);
     }
 }
