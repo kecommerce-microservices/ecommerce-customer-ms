@@ -35,4 +35,9 @@ public class CustomerUseCaseConfig {
     public UpdateCustomerTelephoneUseCase updateCustomerTelephoneUseCase(final CustomerRepository customerRepository, final TelephoneGateway telephoneGateway) {
         return new DefaultUpdateCustomerTelephoneUseCase(customerRepository, telephoneGateway);
     }
+
+    @Bean
+    public GetCustomerByUserIdUseCase getCustomerByUserIdUseCase(final CustomerRepository customerRepository, final TelephoneGateway telephoneGateway) {
+        return new DefaultGetCustomerByUserIdUseCase(customerRepository, telephoneGateway);
+    }
 }
