@@ -1,12 +1,16 @@
 package com.kaua.ecommerce.customer.infrastructure.rest;
 
 import com.kaua.ecommerce.customer.ControllerTest;
+import com.kaua.ecommerce.customer.application.gateways.TelephoneGateway;
+import com.kaua.ecommerce.customer.application.usecases.customer.GetCustomerByUserIdUseCase;
 import com.kaua.ecommerce.customer.application.usecases.customer.UpdateCustomerDocumentUseCase;
 import com.kaua.ecommerce.customer.application.usecases.customer.UpdateCustomerTelephoneUseCase;
 import com.kaua.ecommerce.customer.application.usecases.customer.inputs.UpdateCustomerDocumentInput;
 import com.kaua.ecommerce.customer.application.usecases.customer.inputs.UpdateCustomerTelephoneInput;
+import com.kaua.ecommerce.customer.application.usecases.customer.outputs.GetCustomerByIdentifierOutput;
 import com.kaua.ecommerce.customer.application.usecases.customer.outputs.UpdateCustomerDocumentOutput;
 import com.kaua.ecommerce.customer.application.usecases.customer.outputs.UpdateCustomerTelephoneOutput;
+import com.kaua.ecommerce.customer.domain.Fixture;
 import com.kaua.ecommerce.customer.infrastructure.mediator.SignUpMediator;
 import com.kaua.ecommerce.customer.infrastructure.rest.controllers.CustomerRestController;
 import com.kaua.ecommerce.customer.infrastructure.rest.req.SignUpRequest;
@@ -45,6 +49,9 @@ class CustomerRestApiTest {
 
     @MockBean
     private UpdateCustomerTelephoneUseCase updateCustomerTelephoneUseCase;
+
+    @MockBean
+    private GetCustomerByUserIdUseCase getCustomerByUserIdUseCase;
 
     @Captor
     private ArgumentCaptor<SignUpRequest> signUpRequestCaptor;
@@ -211,5 +218,91 @@ class CustomerRestApiTest {
 
         Assertions.assertEquals(expectedCustomerId, updateCustomerTelephoneInput.customerId().toString());
         Assertions.assertEquals(aPhoneNumber, updateCustomerTelephoneInput.telephone());
+    }
+
+    @Test
+    void givenAValidUserId_whenGetCustomerByUserId_thenReturnCustomer() throws Exception {
+        final var aCustomer = Fixture.Customers.newCustomerWithAllValues();
+        final var aPhoneInfo = new TelephoneGateway.PhoneNumberInformation(
+                "(11) 98765-4321",
+                "BR",
+                "+55"
+        );
+
+        final var aUserId = aCustomer.getUserId().value();
+
+        Mockito.when(getCustomerByUserIdUseCase.execute(aCustomer.getUserId()))
+                .thenReturn(new GetCustomerByIdentifierOutput(
+                        aCustomer,
+                        aPhoneInfo
+                ));
+
+        final var aRequest = MockMvcRequestBuilders.get("/v1/customers/users/%s".formatted(aUserId))
+                .with(admin(aCustomer.getUserId().value(), aCustomer.getId().value()))
+                .accept(MediaType.APPLICATION_JSON_VALUE);
+
+        final var aResponse = this.mvc.perform(aRequest);
+
+        aResponse
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andExpect(header().string("Content-Type", MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.customer_id").value(aCustomer.getId().value().toString()))
+                .andExpect(jsonPath("$.user_id").value(aCustomer.getUserId().value().toString()))
+                .andExpect(jsonPath("$.first_name").value(aCustomer.getName().firstName()))
+                .andExpect(jsonPath("$.last_name").value(aCustomer.getName().lastName()))
+                .andExpect(jsonPath("$.full_name").value(aCustomer.getName().fullName()))
+                .andExpect(jsonPath("$.email").value(aCustomer.getEmail().value()))
+                .andExpect(jsonPath("$.document.number").value(aCustomer.getDocument().get().formattedValue()))
+                .andExpect(jsonPath("$.document.type").value(aCustomer.getDocument().get().type()))
+                .andExpect(jsonPath("$.telephone.phone_number").value(aPhoneInfo.phoneNumber()))
+                .andExpect(jsonPath("$.telephone.country_code").value(aPhoneInfo.countryCode()))
+                .andExpect(jsonPath("$.telephone.region_code").value(aPhoneInfo.regionCode()))
+                .andExpect(jsonPath("$.created_at").value(aCustomer.getCreatedAt().toString()))
+                .andExpect(jsonPath("$.updated_at").value(aCustomer.getUpdatedAt().toString()));
+
+        Mockito.verify(getCustomerByUserIdUseCase, Mockito.times(1)).execute(aCustomer.getUserId());
+    }
+
+    @Test
+    void givenAValidAuthenticatedUser_whenGetMe_thenReturnCustomer() throws Exception {
+        final var aCustomer = Fixture.Customers.newCustomerWithAllValues();
+        final var aPhoneInfo = new TelephoneGateway.PhoneNumberInformation(
+                "(11) 98765-4321",
+                "BR",
+                "+55"
+        );
+
+        Mockito.when(getCustomerByUserIdUseCase.execute(aCustomer.getUserId()))
+                .thenReturn(new GetCustomerByIdentifierOutput(
+                        aCustomer,
+                        aPhoneInfo
+                ));
+
+        final var aRequest = MockMvcRequestBuilders.get("/v1/customers/me")
+                .with(admin(aCustomer.getUserId().value(), aCustomer.getId().value()))
+                .accept(MediaType.APPLICATION_JSON_VALUE);
+
+        final var aResponse = this.mvc.perform(aRequest);
+
+        aResponse
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andExpect(header().string("Content-Type", MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.customer_id").value(aCustomer.getId().value().toString()))
+                .andExpect(jsonPath("$.user_id").value(aCustomer.getUserId().value().toString()))
+                .andExpect(jsonPath("$.first_name").value(aCustomer.getName().firstName()))
+                .andExpect(jsonPath("$.last_name").value(aCustomer.getName().lastName()))
+                .andExpect(jsonPath("$.full_name").value(aCustomer.getName().fullName()))
+                .andExpect(jsonPath("$.email").value(aCustomer.getEmail().value()))
+                .andExpect(jsonPath("$.document.number").value(aCustomer.getDocument().get().formattedValue()))
+                .andExpect(jsonPath("$.document.type").value(aCustomer.getDocument().get().type()))
+                .andExpect(jsonPath("$.telephone.phone_number").value(aPhoneInfo.phoneNumber()))
+                .andExpect(jsonPath("$.telephone.country_code").value(aPhoneInfo.countryCode()))
+                .andExpect(jsonPath("$.telephone.region_code").value(aPhoneInfo.regionCode()))
+                .andExpect(jsonPath("$.created_at").value(aCustomer.getCreatedAt().toString()))
+                .andExpect(jsonPath("$.updated_at").value(aCustomer.getUpdatedAt().toString()));
+
+        Mockito.verify(getCustomerByUserIdUseCase, Mockito.times(1)).execute(aCustomer.getUserId());
     }
 }
