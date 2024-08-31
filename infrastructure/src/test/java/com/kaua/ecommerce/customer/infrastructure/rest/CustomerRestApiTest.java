@@ -305,4 +305,38 @@ class CustomerRestApiTest {
 
         Mockito.verify(getCustomerByUserIdUseCase, Mockito.times(1)).execute(aCustomer.getUserId());
     }
+
+    @Test
+    void givenAValidAuthenticatedUserButWithoutOptionalValues_whenCallGetMe_thenReturnCustomerWithoutOptionalValues() throws Exception {
+        final var aCustomer = Fixture.Customers.newCustomer();
+
+        Mockito.when(getCustomerByUserIdUseCase.execute(aCustomer.getUserId()))
+                .thenReturn(new GetCustomerByIdentifierOutput(
+                        aCustomer,
+                        null
+                ));
+
+        final var aRequest = MockMvcRequestBuilders.get("/v1/customers/me")
+                .with(admin(aCustomer.getUserId().value(), aCustomer.getId().value()))
+                .accept(MediaType.APPLICATION_JSON_VALUE);
+
+        final var aResponse = this.mvc.perform(aRequest);
+
+        aResponse
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andExpect(header().string("Content-Type", MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.customer_id").value(aCustomer.getId().value().toString()))
+                .andExpect(jsonPath("$.user_id").value(aCustomer.getUserId().value().toString()))
+                .andExpect(jsonPath("$.first_name").value(aCustomer.getName().firstName()))
+                .andExpect(jsonPath("$.last_name").value(aCustomer.getName().lastName()))
+                .andExpect(jsonPath("$.full_name").value(aCustomer.getName().fullName()))
+                .andExpect(jsonPath("$.email").value(aCustomer.getEmail().value()))
+                .andExpect(jsonPath("$.document").isEmpty())
+                .andExpect(jsonPath("$.telephone").isEmpty())
+                .andExpect(jsonPath("$.created_at").value(aCustomer.getCreatedAt().toString()))
+                .andExpect(jsonPath("$.updated_at").value(aCustomer.getUpdatedAt().toString()));
+
+        Mockito.verify(getCustomerByUserIdUseCase, Mockito.times(1)).execute(aCustomer.getUserId());
+    }
 }
