@@ -193,4 +193,25 @@ class CustomerJdbcRepositoryTest extends AbstractRepositoryTest {
         Assertions.assertEquals(aCustomer.getCreatedAt(), aActualResponse.getCreatedAt());
         Assertions.assertEquals(aCustomer.getUpdatedAt(), aActualResponse.getUpdatedAt());
     }
+
+    @Test
+    void givenAValidUserId_whenCallCustomerOfUserId_thenReturnCustomer() {
+        Assertions.assertEquals(0, countCustomers());
+
+        final var aCustomer = Fixture.Customers.newCustomer();
+        this.customerRepository().save(aCustomer);
+
+        Assertions.assertEquals(1, countCustomers());
+
+        final var aActualResponse = this.customerRepository().customerOfUserId(aCustomer.getUserId()).get();
+
+        Assertions.assertEquals(aCustomer.getId(), aActualResponse.getId());
+        Assertions.assertEquals(aCustomer.getUserId(), aActualResponse.getUserId());
+        Assertions.assertEquals(aCustomer.getName(), aActualResponse.getName());
+        Assertions.assertEquals(aCustomer.getEmail(), aActualResponse.getEmail());
+        Assertions.assertTrue(aActualResponse.getDocument().isEmpty());
+        Assertions.assertTrue(aActualResponse.getTelephone().isEmpty());
+        Assertions.assertEquals(aCustomer.getCreatedAt(), aActualResponse.getCreatedAt());
+        Assertions.assertEquals(aCustomer.getUpdatedAt(), aActualResponse.getUpdatedAt());
+    }
 }

@@ -76,6 +76,12 @@ public class CustomerJdbcRepository implements CustomerRepository {
         return this.databaseClient.queryOne(aSql, Map.of("id", customerId.value().toString()), customerMapper());
     }
 
+    @Override
+    public Optional<Customer> customerOfUserId(final UserId userId) {
+        final var aSql = "SELECT * FROM customers WHERE idp_user_id = :idpUserId";
+        return this.databaseClient.queryOne(aSql, Map.of("idpUserId", userId.value().toString()), customerMapper());
+    }
+
     private void create(final Customer aCustomer) {
         final var aSql = """
                 INSERT INTO customers (id, version, idp_user_id, email, first_name, last_name, document_number, document_type, phone_number, created_at, updated_at)
