@@ -7,6 +7,8 @@
 - [x] Adicionado a compensação para deletar o IDP user caso o customer não seja salvo no database
 - [X] Adicionado a atualização do documento do customer
 - [X] Adicionado a atualização do telefone do customer
+- [X] Adicionado a rota para pegar o customer pelo user id
+- [X] Adicionado a rota para pegar o customer autenticado
 
 # 0.1.0
 - [X] Adicionado o setup inicial do projeto
