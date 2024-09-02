@@ -3,6 +3,7 @@ package com.kaua.ecommerce.customer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.kaua.ecommerce.customer.infrastructure.configurations.WebServerConfig;
+import com.kaua.ecommerce.customer.infrastructure.gateways.AddressGatewayImpl;
 import com.kaua.ecommerce.customer.infrastructure.gateways.AuthServerIdentityProviderClient;
 import io.github.resilience4j.bulkhead.BulkheadRegistry;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
@@ -24,6 +25,7 @@ import java.util.List;
 public abstract class AbstractRestClientTest {
 
     protected static final String USERS = AuthServerIdentityProviderClient.NAMESPACE_NAME;
+    protected static final String ADDRESSES = AddressGatewayImpl.NAMESPACE_NAME;
 
     @Autowired
     private ObjectMapper mapper;
@@ -38,7 +40,7 @@ public abstract class AbstractRestClientTest {
     void beforeEach() {
         WireMock.reset();
         WireMock.resetAllRequests();
-        List.of(USERS).forEach(this::resetFaultTolerance);
+        List.of(USERS, ADDRESSES).forEach(this::resetFaultTolerance);
     }
 
     protected void checkCircuitBreakerState(final String name, final CircuitBreaker.State expectedState) {

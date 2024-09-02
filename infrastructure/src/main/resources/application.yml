@@ -15,6 +15,10 @@ web-client:
     base-url: "${web-client.auth-server-url}/api/v1/users"
     read-timeout: 2_000 # milliseconds
     connect-timeout: 2_000 # milliseconds
+  address:
+    base-url: "${web-client.address-url}"
+    read-timeout: 3_000 # milliseconds
+    connect-timeout: 3_000 # milliseconds
 
 jobs:
   client-credentials:
@@ -77,6 +81,8 @@ resilience4j.bulkhead:
   instances:
     users:
       baseConfig: default
+    address:
+      baseConfig: default
 
 resilience4j.circuitbreaker: # https://resilience4j.readme.io/docs/circuitbreaker
   configs:
@@ -109,6 +115,8 @@ resilience4j.circuitbreaker: # https://resilience4j.readme.io/docs/circuitbreake
   instances:
     users:
       baseConfig: default
+    address:
+      baseConfig: default
 
 resilience4j.retry:
   configs:
@@ -137,3 +145,5 @@ resilience4j.retry:
       baseConfig: default
     AuthServer:
       baseConfig: authServerConfig
+    address:
+      baseConfig: default

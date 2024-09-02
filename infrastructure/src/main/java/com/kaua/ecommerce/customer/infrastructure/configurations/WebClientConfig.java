@@ -1,5 +1,6 @@
 package com.kaua.ecommerce.customer.infrastructure.configurations;
 
+import com.kaua.ecommerce.customer.infrastructure.configurations.annotations.Addresses;
 import com.kaua.ecommerce.customer.infrastructure.configurations.annotations.AuthServer;
 import com.kaua.ecommerce.customer.infrastructure.configurations.annotations.Users;
 import com.kaua.ecommerce.customer.infrastructure.configurations.properties.WebClientProperties;
@@ -33,6 +34,13 @@ public class WebClientConfig {
     }
 
     @Bean
+    @ConfigurationProperties(prefix = "web-client.address")
+    @Addresses
+    public WebClientProperties addressWebClientProperties() {
+        return new WebClientProperties();
+    }
+
+    @Bean
     @AuthServer
     public WebClient authServerWebClient(@AuthServer final WebClientProperties authServerProperties) {
         return buildWebClient(authServerProperties);
@@ -42,6 +50,12 @@ public class WebClientConfig {
     @Users
     public WebClient usersWebClient(@Users final WebClientProperties usersProperties) {
         return buildWebClient(usersProperties);
+    }
+
+    @Bean
+    @Addresses
+    public WebClient addressWebClient(@Addresses final WebClientProperties addressProperties) {
+        return buildWebClient(addressProperties);
     }
 
     private WebClient buildWebClient(final WebClientProperties properties) {

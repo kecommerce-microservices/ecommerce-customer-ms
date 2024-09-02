@@ -1,10 +1,9 @@
-package com.kaua.ecommerce.customer.application.usecases.impl;
+package com.kaua.ecommerce.customer.application.usecases.customer.impl;
 
 import com.kaua.ecommerce.customer.application.UseCaseTest;
 import com.kaua.ecommerce.customer.application.exceptions.UseCaseInputCannotBeNullException;
 import com.kaua.ecommerce.customer.application.gateways.TelephoneGateway;
 import com.kaua.ecommerce.customer.application.repositories.CustomerRepository;
-import com.kaua.ecommerce.customer.application.usecases.customer.impl.DefaultGetCustomerByUserIdUseCase;
 import com.kaua.ecommerce.customer.domain.Fixture;
 import com.kaua.ecommerce.customer.domain.customer.idp.UserId;
 import com.kaua.ecommerce.lib.domain.exceptions.NotFoundException;

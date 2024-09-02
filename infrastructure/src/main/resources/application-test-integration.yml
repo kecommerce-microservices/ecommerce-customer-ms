@@ -8,6 +8,7 @@ web-client:
   users:
     read-timeout: 1000
     connect-timeout: 1000
+  address-url: "http://localhost:${wiremock.server.port:8002}/ws"
 
 resilience4j.bulkhead:
   configs:

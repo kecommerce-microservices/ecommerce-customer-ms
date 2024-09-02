@@ -1,5 +1,7 @@
 package com.kaua.ecommerce.customer.domain;
 
+import com.kaua.ecommerce.customer.domain.address.Address;
+import com.kaua.ecommerce.customer.domain.address.Title;
 import com.kaua.ecommerce.customer.domain.customer.Customer;
 import com.kaua.ecommerce.customer.domain.customer.CustomerId;
 import com.kaua.ecommerce.customer.domain.customer.idp.User;
@@ -112,6 +114,28 @@ public final class Fixture {
             aCustomer.updateTelephone(new Telephone("+5511987654321"));
 
             return aCustomer;
+        }
+    }
+
+    public static final class Addresses {
+        private Addresses() {}
+
+        public static Address newAddressWithComplement(final CustomerId aCustomerId, final boolean aIsDefault) {
+            final var aAddress = faker.address();
+
+            return Address.newAddress(
+                    new Title("Home"),
+                    aCustomerId,
+                    aAddress.zipCode(),
+                    aAddress.buildingNumber(),
+                    aAddress.streetName(),
+                    aAddress.city(),
+                    "District",
+                    aAddress.country(),
+                    aAddress.state(),
+                    "Complement",
+                    aIsDefault
+            );
         }
     }
 }
