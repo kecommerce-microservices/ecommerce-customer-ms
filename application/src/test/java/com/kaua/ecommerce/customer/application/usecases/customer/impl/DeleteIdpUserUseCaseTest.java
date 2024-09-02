@@ -3,7 +3,6 @@ package com.kaua.ecommerce.customer.application.usecases.customer.impl;
 import com.kaua.ecommerce.customer.application.UseCaseTest;
 import com.kaua.ecommerce.customer.application.exceptions.UseCaseInputCannotBeNullException;
 import com.kaua.ecommerce.customer.application.gateways.IdentityProviderGateway;
-import com.kaua.ecommerce.customer.application.usecases.customer.impl.DefaultDeleteIdpUserUseCase;
 import com.kaua.ecommerce.customer.domain.customer.idp.UserId;
 import com.kaua.ecommerce.lib.domain.utils.IdentifierUtils;
 import org.junit.jupiter.api.Assertions;

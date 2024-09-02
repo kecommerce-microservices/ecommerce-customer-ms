@@ -3,7 +3,6 @@ package com.kaua.ecommerce.customer.application.usecases.customer.impl;
 import com.kaua.ecommerce.customer.application.UseCaseTest;
 import com.kaua.ecommerce.customer.application.exceptions.UseCaseInputCannotBeNullException;
 import com.kaua.ecommerce.customer.application.repositories.CustomerRepository;
-import com.kaua.ecommerce.customer.application.usecases.customer.impl.DefaultUpdateCustomerDocumentUseCase;
 import com.kaua.ecommerce.customer.application.usecases.customer.inputs.UpdateCustomerDocumentInput;
 import com.kaua.ecommerce.customer.application.usecases.customer.outputs.UpdateCustomerDocumentOutput;
 import com.kaua.ecommerce.customer.domain.Fixture;

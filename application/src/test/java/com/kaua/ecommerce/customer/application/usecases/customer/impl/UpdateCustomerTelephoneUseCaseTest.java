@@ -4,7 +4,6 @@ import com.kaua.ecommerce.customer.application.UseCaseTest;
 import com.kaua.ecommerce.customer.application.exceptions.UseCaseInputCannotBeNullException;
 import com.kaua.ecommerce.customer.application.gateways.TelephoneGateway;
 import com.kaua.ecommerce.customer.application.repositories.CustomerRepository;
-import com.kaua.ecommerce.customer.application.usecases.customer.impl.DefaultUpdateCustomerTelephoneUseCase;
 import com.kaua.ecommerce.customer.application.usecases.customer.inputs.UpdateCustomerTelephoneInput;
 import com.kaua.ecommerce.customer.domain.Fixture;
 import com.kaua.ecommerce.customer.domain.customer.CustomerId;
