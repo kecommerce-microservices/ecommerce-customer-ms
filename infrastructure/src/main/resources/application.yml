@@ -81,6 +81,8 @@ resilience4j.bulkhead:
   instances:
     users:
       baseConfig: default
+    address:
+      baseConfig: default
 
 resilience4j.circuitbreaker: # https://resilience4j.readme.io/docs/circuitbreaker
   configs:
@@ -113,6 +115,8 @@ resilience4j.circuitbreaker: # https://resilience4j.readme.io/docs/circuitbreake
   instances:
     users:
       baseConfig: default
+    address:
+      baseConfig: default
 
 resilience4j.retry:
   configs:
@@ -141,3 +145,5 @@ resilience4j.retry:
       baseConfig: default
     AuthServer:
       baseConfig: authServerConfig
+    address:
+      baseConfig: default
