@@ -9,6 +9,7 @@
 - [X] Adicionado a atualização do telefone do customer
 - [X] Adicionado a rota para pegar o customer pelo user id
 - [X] Adicionado a rota para pegar o customer autenticado
+- [X] Adicionado a criação do address do customer
 
 # 0.1.0
 - [X] Adicionado o setup inicial do projeto
