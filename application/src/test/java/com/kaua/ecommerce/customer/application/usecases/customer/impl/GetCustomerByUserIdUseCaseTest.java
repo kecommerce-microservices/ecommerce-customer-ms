@@ -1,4 +1,4 @@
-package com.kaua.ecommerce.customer.application.usecases.impl;
+package com.kaua.ecommerce.customer.application.usecases.customer.impl;
 
 import com.kaua.ecommerce.customer.application.UseCaseTest;
 import com.kaua.ecommerce.customer.application.exceptions.UseCaseInputCannotBeNullException;
