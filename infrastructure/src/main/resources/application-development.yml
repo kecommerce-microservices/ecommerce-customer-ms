@@ -5,6 +5,7 @@ auth-server:
 
 web-client:
   auth-server-url: "${auth-server.host}"
+  address-url: https://viacep.com.br/ws
 
 server:
   undertow:

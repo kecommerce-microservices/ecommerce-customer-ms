@@ -4,6 +4,7 @@ auth-server:
 
 web-client:
   auth-server-url: http://localhost:8080
+  address-url: https://viacep.com.br/ws
 
 server:
   undertow:
