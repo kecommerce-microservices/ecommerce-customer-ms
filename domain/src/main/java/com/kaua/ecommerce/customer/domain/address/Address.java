@@ -95,6 +95,12 @@ public class Address extends AggregateRoot<AddressId> {
         );
     }
 
+    public Address updateIsDefault(final boolean aIsDefault) {
+        this.setDefault(aIsDefault);
+        this.setUpdatedAt(InstantUtils.now());
+        return this;
+    }
+
     public static Address with(
             final AddressId aAddressId,
             final long aVersion,

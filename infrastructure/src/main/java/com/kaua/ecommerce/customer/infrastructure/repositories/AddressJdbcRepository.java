@@ -2,8 +2,13 @@ package com.kaua.ecommerce.customer.infrastructure.repositories;
 
 import com.kaua.ecommerce.customer.application.repositories.AddressRepository;
 import com.kaua.ecommerce.customer.domain.address.Address;
+import com.kaua.ecommerce.customer.domain.address.AddressId;
+import com.kaua.ecommerce.customer.domain.address.Title;
 import com.kaua.ecommerce.customer.domain.customer.CustomerId;
 import com.kaua.ecommerce.customer.infrastructure.jdbc.DatabaseClient;
+import com.kaua.ecommerce.customer.infrastructure.jdbc.JdbcUtils;
+import com.kaua.ecommerce.customer.infrastructure.jdbc.RowMap;
+import com.kaua.ecommerce.lib.infrastructure.exceptions.ConflictException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -11,9 +16,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @Repository
 public class AddressJdbcRepository implements AddressRepository {
@@ -31,12 +34,30 @@ public class AddressJdbcRepository implements AddressRepository {
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public Address save(final Address aAddress) {
-        log.debug("Creating a new address: {}", aAddress);
-        create(aAddress);
-        log.info("Address created: {}", aAddress);
+        if (aAddress.getVersion() == 0) {
+            log.debug("Creating a new address: {}", aAddress);
+            create(aAddress);
+            log.info("Address created: {}", aAddress);
+        } else {
+            log.debug("Updating address: {}", aAddress);
+            update(aAddress);
+            log.info("Address updated: {}", aAddress);
+        }
 
         aAddress.incrementVersion();
         return aAddress;
+    }
+
+    @Override
+    public Optional<Address> addressOfId(final AddressId aAddressId) {
+        final var aSql = "SELECT * FROM addresses WHERE id = :id";
+        return this.databaseClient.queryOne(aSql, Map.of("id", aAddressId.value()), addressMapper());
+    }
+
+    @Override
+    public Optional<Address> addressByCustomerIdAndIsDefaultTrue(final CustomerId aCustomerId) {
+        final var aSql = "SELECT * FROM addresses WHERE customer_id = :customerId AND is_default = true";
+        return this.databaseClient.queryOne(aSql, Map.of(CUSTOMER_COLUMN, aCustomerId.value()), addressMapper());
     }
 
     @Override
@@ -59,7 +80,32 @@ public class AddressJdbcRepository implements AddressRepository {
         executeUpdate(aSql, aAddress);
     }
 
-    private void executeUpdate(final String sql, final Address aAddress) {
+    private void update(final Address aAddress) {
+        final var aSql = """
+                UPDATE addresses
+                SET
+                    version = :version + 1,
+                    title = :title,
+                    customer_id = :customerId,
+                    zip_code = :zipCode,
+                    number = :number,
+                    street = :street,
+                    city = :city,
+                    district = :district,
+                    country = :country,
+                    state = :state,
+                    complement = :complement,
+                    is_default = :isDefault,
+                    updated_at = :updatedAt
+                WHERE id = :id AND version = :version
+                """;
+
+        if (executeUpdate(aSql, aAddress) == 0) {
+            throw ConflictException.with("Address version does not match, address was updated by another user");
+        }
+    }
+
+    private int executeUpdate(final String sql, final Address aAddress) {
         final var aParams = new HashMap<String, Object>();
         aParams.put("id", aAddress.getId().value());
         aParams.put("version", aAddress.getVersion());
@@ -77,6 +123,26 @@ public class AddressJdbcRepository implements AddressRepository {
         aParams.put("createdAt", Timestamp.from(aAddress.getCreatedAt()));
         aParams.put("updatedAt", Timestamp.from(aAddress.getUpdatedAt()));
 
-        this.databaseClient.update(sql, aParams);
+        return this.databaseClient.update(sql, aParams);
+    }
+
+    private RowMap<Address> addressMapper() {
+        return rs -> Address.with(
+                new AddressId(UUID.fromString(rs.getString("id"))),
+                rs.getLong("version"),
+                new Title(rs.getString("title")),
+                new CustomerId(UUID.fromString(rs.getString("customer_id"))),
+                rs.getString("zip_code"),
+                rs.getString("number"),
+                rs.getString("street"),
+                rs.getString("city"),
+                rs.getString("district"),
+                rs.getString("country"),
+                rs.getString("state"),
+                rs.getString("complement"),
+                rs.getBoolean("is_default"),
+                JdbcUtils.getInstant(rs, "created_at"),
+                JdbcUtils.getInstant(rs, "updated_at")
+        );
     }
 }
