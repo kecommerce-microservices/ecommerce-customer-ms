@@ -6,6 +6,7 @@ import com.kaua.ecommerce.customer.domain.address.Address;
 import com.kaua.ecommerce.customer.domain.address.Title;
 import com.kaua.ecommerce.customer.domain.customer.CustomerId;
 import com.kaua.ecommerce.lib.domain.utils.IdentifierUtils;
+import com.kaua.ecommerce.lib.infrastructure.exceptions.ConflictException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -136,5 +137,142 @@ class AddressJdbcRepositoryTest extends AbstractRepositoryTest {
         final var aActualResponse = this.addressRepository().existsByCustomerIdAndIsDefaultTrue(aCustomerId);
 
         Assertions.assertFalse(aActualResponse);
+    }
+
+    @Test
+    void givenAValidAddressId_whenCallAddressOfId_thenReturnAddress() {
+        Assertions.assertEquals(0, countAddresses());
+
+        final var aCustomerId = new CustomerId(IdentifierUtils.generateNewUUID());
+
+        final var aAddress = Fixture.Addresses.newAddressWithComplement(
+                aCustomerId,
+                true
+        );
+
+        this.addressRepository().save(aAddress);
+
+        Assertions.assertEquals(1, countAddresses());
+
+        final var aActualResponse = this.addressRepository().addressOfId(aAddress.getId());
+
+        Assertions.assertTrue(aActualResponse.isPresent());
+        Assertions.assertEquals(aAddress.getId().value(), aActualResponse.get().getId().value());
+        Assertions.assertEquals(aAddress.getTitle().value(), aActualResponse.get().getTitle().value());
+        Assertions.assertEquals(aCustomerId, aActualResponse.get().getCustomerId());
+        Assertions.assertEquals(aAddress.getZipCode(), aActualResponse.get().getZipCode());
+        Assertions.assertEquals(aAddress.getStreet(), aActualResponse.get().getStreet());
+        Assertions.assertEquals(aAddress.getNumber(), aActualResponse.get().getNumber());
+        Assertions.assertEquals(aAddress.getCity(), aActualResponse.get().getCity());
+        Assertions.assertEquals(aAddress.getDistrict(), aActualResponse.get().getDistrict());
+        Assertions.assertEquals(aAddress.getCountry(), aActualResponse.get().getCountry());
+        Assertions.assertEquals(aAddress.getState(), aActualResponse.get().getState());
+        Assertions.assertEquals(aAddress.getComplement().get(), aActualResponse.get().getComplement().get());
+        Assertions.assertEquals(aAddress.isDefault(), aActualResponse.get().isDefault());
+        Assertions.assertEquals(aAddress.getCreatedAt(), aActualResponse.get().getCreatedAt());
+        Assertions.assertEquals(aAddress.getUpdatedAt(), aActualResponse.get().getUpdatedAt());
+    }
+
+    @Test
+    void givenAValidCustomerId_whenCallAddressByCustomerIdAndIsDefaultTrue_thenReturnAddress() {
+        Assertions.assertEquals(0, countAddresses());
+
+        final var aCustomerId = new CustomerId(IdentifierUtils.generateNewUUID());
+
+        final var aAddress = Fixture.Addresses.newAddressWithComplement(
+                aCustomerId,
+                true
+        );
+
+        this.addressRepository().save(aAddress);
+        this.addressRepository().save(Fixture.Addresses.newAddressWithComplement(
+                aCustomerId,
+                false
+        ));
+
+        Assertions.assertEquals(2, countAddresses());
+
+        final var aActualResponse = this.addressRepository().addressByCustomerIdAndIsDefaultTrue(aAddress.getCustomerId());
+
+        Assertions.assertTrue(aActualResponse.isPresent());
+        Assertions.assertEquals(aAddress.getId().value(), aActualResponse.get().getId().value());
+        Assertions.assertEquals(aAddress.getTitle().value(), aActualResponse.get().getTitle().value());
+        Assertions.assertEquals(aCustomerId, aActualResponse.get().getCustomerId());
+        Assertions.assertEquals(aAddress.getZipCode(), aActualResponse.get().getZipCode());
+        Assertions.assertEquals(aAddress.getStreet(), aActualResponse.get().getStreet());
+        Assertions.assertEquals(aAddress.getNumber(), aActualResponse.get().getNumber());
+        Assertions.assertEquals(aAddress.getCity(), aActualResponse.get().getCity());
+        Assertions.assertEquals(aAddress.getDistrict(), aActualResponse.get().getDistrict());
+        Assertions.assertEquals(aAddress.getCountry(), aActualResponse.get().getCountry());
+        Assertions.assertEquals(aAddress.getState(), aActualResponse.get().getState());
+        Assertions.assertEquals(aAddress.getComplement().get(), aActualResponse.get().getComplement().get());
+        Assertions.assertEquals(aAddress.isDefault(), aActualResponse.get().isDefault());
+        Assertions.assertEquals(aAddress.getCreatedAt(), aActualResponse.get().getCreatedAt());
+        Assertions.assertEquals(aAddress.getUpdatedAt(), aActualResponse.get().getUpdatedAt());
+    }
+
+    @Test
+    void givenAValidAddressToUpdate_whenCallSave_thenAddressIsUpdated() {
+        Assertions.assertEquals(0, countAddresses());
+
+        final var aCustomerId = new CustomerId(IdentifierUtils.generateNewUUID());
+
+        final var aAddress = Fixture.Addresses.newAddressWithComplement(
+                aCustomerId,
+                true
+        );
+
+        this.addressRepository().save(aAddress);
+
+        Assertions.assertEquals(1, countAddresses());
+
+        final var aUpdatedAddress = aAddress.updateIsDefault(false);
+
+        final var aActualResponse = this.addressRepository().save(aUpdatedAddress);
+
+        Assertions.assertEquals(1, countAddresses());
+        Assertions.assertEquals(2, aActualResponse.getVersion());
+        Assertions.assertEquals(aUpdatedAddress.getId().value(), aActualResponse.getId().value());
+        Assertions.assertEquals(aCustomerId, aActualResponse.getCustomerId());
+        Assertions.assertEquals(aUpdatedAddress.getStreet(), aActualResponse.getStreet());
+        Assertions.assertEquals(aUpdatedAddress.getNumber(), aActualResponse.getNumber());
+        Assertions.assertEquals(aUpdatedAddress.getComplement().get(), aActualResponse.getComplement().get());
+        Assertions.assertEquals(aUpdatedAddress.getCity(), aActualResponse.getCity());
+        Assertions.assertEquals(aUpdatedAddress.getDistrict(), aActualResponse.getDistrict());
+        Assertions.assertEquals(aUpdatedAddress.getCountry(), aActualResponse.getCountry());
+        Assertions.assertEquals(aUpdatedAddress.getState(), aActualResponse.getState());
+        Assertions.assertEquals(aUpdatedAddress.getZipCode(), aActualResponse.getZipCode());
+        Assertions.assertNotNull(aActualResponse.getCreatedAt());
+        Assertions.assertNotNull(aActualResponse.getUpdatedAt());
+    }
+
+    @Test
+    void givenAValidAddressToUpdate_whenCallSaveButVersionIsNotMatch_thenThrowConflictException() {
+        Assertions.assertEquals(0, countAddresses());
+
+        final var aCustomerId = new CustomerId(IdentifierUtils.generateNewUUID());
+
+        final var aAddress = Fixture.Addresses.newAddressWithComplement(
+                aCustomerId,
+                true
+        );
+        this.addressRepository().save(aAddress);
+
+        final var expectedErrorMessage = "Address version does not match, address was updated by another user";
+
+        Assertions.assertEquals(1, countAddresses());
+
+        final var aAddressSaved = this.addressRepository().addressOfId(aAddress.getId()).get();
+
+        final var aUpdatedAddress = aAddressSaved.updateIsDefault(false);
+
+        aUpdatedAddress.setVersion(2);
+
+        final var aAddressRepository = addressRepository();
+        final var aException = Assertions.assertThrows(ConflictException.class, () -> {
+            aAddressRepository.save(aUpdatedAddress);
+        });
+
+        Assertions.assertEquals(expectedErrorMessage, aException.getMessage());
     }
 }
