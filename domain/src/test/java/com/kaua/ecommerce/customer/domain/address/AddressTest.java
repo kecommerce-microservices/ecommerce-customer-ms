@@ -1,5 +1,6 @@
 package com.kaua.ecommerce.customer.domain.address;
 
+import com.kaua.ecommerce.customer.domain.Fixture;
 import com.kaua.ecommerce.customer.domain.UnitTest;
 import com.kaua.ecommerce.customer.domain.customer.CustomerId;
 import com.kaua.ecommerce.lib.domain.utils.IdentifierUtils;
@@ -201,5 +202,22 @@ class AddressTest extends UnitTest {
         Assertions.assertTrue(aToString.contains("createdAt="));
         Assertions.assertTrue(aToString.contains("updatedAt="));
         Assertions.assertTrue(aToString.contains("version="));
+    }
+
+    @Test
+    void givenAValidIsDefault_whenCallUpdateIsDefault_thenIsDefaultShouldBeUpdated() {
+        final var aAddress = Fixture.Addresses.newAddressWithComplement(
+                new CustomerId(IdentifierUtils.generateNewUUID()),
+                false
+        );
+
+        final var aIsDefault = true;
+        final var aUpdatedAt = aAddress.getUpdatedAt();
+
+        final var aUpdatedAddress = aAddress.updateIsDefault(aIsDefault);
+
+        Assertions.assertNotNull(aUpdatedAddress);
+        Assertions.assertEquals(aIsDefault, aUpdatedAddress.isDefault());
+        Assertions.assertTrue(aUpdatedAddress.getUpdatedAt().isAfter(aUpdatedAt));
     }
 }
