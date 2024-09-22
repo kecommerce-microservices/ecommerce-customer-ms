@@ -220,4 +220,49 @@ class AddressTest extends UnitTest {
         Assertions.assertEquals(aIsDefault, aUpdatedAddress.isDefault());
         Assertions.assertTrue(aUpdatedAddress.getUpdatedAt().isAfter(aUpdatedAt));
     }
+
+    @Test
+    void givenAValidValues_whenCallUpdate_thenAddressShouldBeUpdated() {
+        final var aAddress = Fixture.Addresses.newAddressWithComplement(
+                new CustomerId(IdentifierUtils.generateNewUUID()),
+                false
+        );
+
+        final var aTitle = new Title("Work");
+        final var aZipCode = "87654321";
+        final var aNumber = "321";
+        final var aStreet = "Second Street";
+        final var aCity = "Los Angeles";
+        final var aDistrict = "Hollywood";
+        final var aCountry = "USA";
+        final var aState = "CA";
+        final var aComplement = "Near the beach";
+
+        final var aUpdatedAt = aAddress.getUpdatedAt();
+
+        final var aUpdatedAddress = aAddress.update(
+                aTitle,
+                aZipCode,
+                aNumber,
+                aStreet,
+                aCity,
+                aDistrict,
+                aCountry,
+                aState,
+                aComplement
+        );
+
+        Assertions.assertNotNull(aUpdatedAddress);
+        Assertions.assertEquals(aTitle, aUpdatedAddress.getTitle());
+        Assertions.assertEquals(aZipCode, aUpdatedAddress.getZipCode());
+        Assertions.assertEquals(aNumber, aUpdatedAddress.getNumber());
+        Assertions.assertEquals(aStreet, aUpdatedAddress.getStreet());
+        Assertions.assertEquals(aCity, aUpdatedAddress.getCity());
+        Assertions.assertEquals(aDistrict, aUpdatedAddress.getDistrict());
+        Assertions.assertEquals(aCountry, aUpdatedAddress.getCountry());
+        Assertions.assertEquals(aState, aUpdatedAddress.getState());
+        Assertions.assertEquals(aComplement, aUpdatedAddress.getComplement().get());
+        Assertions.assertEquals(aAddress.isDefault(), aUpdatedAddress.isDefault());
+        Assertions.assertTrue(aUpdatedAddress.getUpdatedAt().isAfter(aUpdatedAt));
+    }
 }
