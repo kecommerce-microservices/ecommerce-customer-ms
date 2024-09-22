@@ -2,9 +2,11 @@ package com.kaua.ecommerce.customer.infrastructure.rest;
 
 import com.kaua.ecommerce.customer.application.usecases.address.outputs.CreateCustomerAddressOutput;
 import com.kaua.ecommerce.customer.application.usecases.address.outputs.UpdateAddressIsDefaultOutput;
+import com.kaua.ecommerce.customer.application.usecases.address.outputs.UpdateAddressOutput;
 import com.kaua.ecommerce.customer.infrastructure.configurations.authentication.EcommerceUser;
 import com.kaua.ecommerce.customer.infrastructure.rest.req.address.CreateCustomerAddressRequest;
 import com.kaua.ecommerce.customer.infrastructure.rest.req.address.UpdateAddressIsDefaultRequest;
+import com.kaua.ecommerce.customer.infrastructure.rest.req.address.UpdateAddressRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -49,5 +51,22 @@ public interface AddressRestApi {
     ResponseEntity<UpdateAddressIsDefaultOutput> updateAddressIsDefault(
             @PathVariable String addressId,
             @RequestBody UpdateAddressIsDefaultRequest request
+    );
+
+    @PatchMapping(
+            value = "/{addressId}",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    @Operation(summary = "Update the address for authenticated customer")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Address successfully updated"),
+            @ApiResponse(responseCode = "400", description = "A validation error was observed"),
+            @ApiResponse(responseCode = "404", description = "Address was not found by identifier"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    ResponseEntity<UpdateAddressOutput> updateAddress(
+            @PathVariable String addressId,
+            @RequestBody UpdateAddressRequest request
     );
 }
