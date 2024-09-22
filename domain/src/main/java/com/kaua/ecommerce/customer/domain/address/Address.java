@@ -13,6 +13,10 @@ public class Address extends AggregateRoot<AddressId> {
     private static final String SHOULD_NOT_BE_NULL = "should not be null";
     private static final String SHOULD_NOT_BE_EMPTY = "should not be empty";
 
+    // poderia ter o telefone pra contato
+    // nome do destinatário
+    // tipo de endereço (residencial, comercial, etc)
+    // descrição, fachada xpto e também manter o completo que é usado tipo Apt 123, Bloco 1, etc
     private Title title;
     private CustomerId customerId;
     private String zipCode;
@@ -97,6 +101,30 @@ public class Address extends AggregateRoot<AddressId> {
 
     public Address updateIsDefault(final boolean aIsDefault) {
         this.setDefault(aIsDefault);
+        this.setUpdatedAt(InstantUtils.now());
+        return this;
+    }
+
+    public Address update(
+            final Title aTitle,
+            final String aZipCode,
+            final String aNumber,
+            final String aStreet,
+            final String aCity,
+            final String aDistrict,
+            final String aCountry,
+            final String aState,
+            final String aComplement
+    ) {
+        this.setTitle(aTitle);
+        this.setZipCode(aZipCode);
+        this.setNumber(aNumber);
+        this.setStreet(aStreet);
+        this.setCity(aCity);
+        this.setDistrict(aDistrict);
+        this.setCountry(aCountry);
+        this.setState(aState);
+        this.setComplement(aComplement);
         this.setUpdatedAt(InstantUtils.now());
         return this;
     }
