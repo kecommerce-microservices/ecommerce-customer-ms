@@ -1,17 +1,11 @@
 package com.kaua.ecommerce.customer.infrastructure.rest;
 
 import com.kaua.ecommerce.customer.ControllerTest;
-import com.kaua.ecommerce.customer.application.usecases.address.CreateCustomerAddressUseCase;
-import com.kaua.ecommerce.customer.application.usecases.address.GetAddressByIdUseCase;
-import com.kaua.ecommerce.customer.application.usecases.address.UpdateAddressIsDefaultUseCase;
-import com.kaua.ecommerce.customer.application.usecases.address.UpdateAddressUseCase;
+import com.kaua.ecommerce.customer.application.usecases.address.*;
 import com.kaua.ecommerce.customer.application.usecases.address.inputs.CreateCustomerAddressInput;
 import com.kaua.ecommerce.customer.application.usecases.address.inputs.UpdateAddressInput;
 import com.kaua.ecommerce.customer.application.usecases.address.inputs.UpdateAddressIsDefaultInput;
-import com.kaua.ecommerce.customer.application.usecases.address.outputs.CreateCustomerAddressOutput;
-import com.kaua.ecommerce.customer.application.usecases.address.outputs.GetAddressByIdOutput;
-import com.kaua.ecommerce.customer.application.usecases.address.outputs.UpdateAddressIsDefaultOutput;
-import com.kaua.ecommerce.customer.application.usecases.address.outputs.UpdateAddressOutput;
+import com.kaua.ecommerce.customer.application.usecases.address.outputs.*;
 import com.kaua.ecommerce.customer.domain.Fixture;
 import com.kaua.ecommerce.customer.domain.customer.CustomerId;
 import com.kaua.ecommerce.customer.infrastructure.rest.controllers.AddressRestController;
@@ -51,6 +45,9 @@ class AddressRestApiTest {
 
     @MockBean
     private GetAddressByIdUseCase getAddressByIdUseCase;
+
+    @MockBean
+    private GetDefaultAddressByCustomerIdUseCase getDefaultAddressByCustomerIdUseCase;
 
     @Captor
     private ArgumentCaptor<CreateCustomerAddressInput> createCustomerAddressInputCaptor;
@@ -232,6 +229,43 @@ class AddressRestApiTest {
                 .andExpect(status().isOk())
                 .andExpect(header().string("Content-Type", MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.id").value(aAddressId))
+                .andExpect(jsonPath("$.title").value(aAddress.getTitle().value()))
+                .andExpect(jsonPath("$.customer_id").value(aAddress.getCustomerId().value().toString()))
+                .andExpect(jsonPath("$.zip_code").value(aAddress.getZipCode()))
+                .andExpect(jsonPath("$.number").value(aAddress.getNumber()))
+                .andExpect(jsonPath("$.street").value(aAddress.getStreet()))
+                .andExpect(jsonPath("$.city").value(aAddress.getCity()))
+                .andExpect(jsonPath("$.district").value(aAddress.getDistrict()))
+                .andExpect(jsonPath("$.country").value(aAddress.getCountry()))
+                .andExpect(jsonPath("$.state").value(aAddress.getState()))
+                .andExpect(jsonPath("$.complement").value(aAddress.getComplement().orElse(null)))
+                .andExpect(jsonPath("$.is_default").value(aAddress.isDefault()))
+                .andExpect(jsonPath("$.created_at").value(aAddress.getCreatedAt().toString()))
+                .andExpect(jsonPath("$.updated_at").value(aAddress.getUpdatedAt().toString()))
+                .andExpect(jsonPath("$.version").isNotEmpty());
+    }
+
+    @Test
+    void givenAValidAuthenticatedUser_whenCallGetDefaultAddressByCustomerId_thenReturnAddressResponse() throws Exception {
+        final var aCustomerId = new CustomerId(IdentifierUtils.generateNewUUID());
+
+        final var aAddress = Fixture.Addresses.newAddressWithComplement(aCustomerId, true);
+
+        Mockito.when(getDefaultAddressByCustomerIdUseCase.execute(any()))
+                .thenReturn(new GetDefaultAddressByCustomerIdOutput(aAddress));
+
+        final var aRequest = MockMvcRequestBuilders.get("/v1/addresses/default")
+                .with(admin(IdentifierUtils.generateNewUUID(), aCustomerId.value()))
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .contentType(MediaType.APPLICATION_JSON_VALUE);
+
+        final var aResponse = this.mvc.perform(aRequest);
+
+        aResponse
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andExpect(header().string("Content-Type", MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.id").value(aAddress.getId().value().toString()))
                 .andExpect(jsonPath("$.title").value(aAddress.getTitle().value()))
                 .andExpect(jsonPath("$.customer_id").value(aAddress.getCustomerId().value().toString()))
                 .andExpect(jsonPath("$.zip_code").value(aAddress.getZipCode()))
