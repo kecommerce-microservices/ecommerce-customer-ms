@@ -7,6 +7,7 @@ import com.kaua.ecommerce.customer.infrastructure.configurations.authentication.
 import com.kaua.ecommerce.customer.infrastructure.rest.req.address.CreateCustomerAddressRequest;
 import com.kaua.ecommerce.customer.infrastructure.rest.req.address.UpdateAddressIsDefaultRequest;
 import com.kaua.ecommerce.customer.infrastructure.rest.req.address.UpdateAddressRequest;
+import com.kaua.ecommerce.customer.infrastructure.rest.res.GetAddressByIdResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -68,5 +69,19 @@ public interface AddressRestApi {
     ResponseEntity<UpdateAddressOutput> updateAddress(
             @PathVariable String addressId,
             @RequestBody UpdateAddressRequest request
+    );
+
+    @GetMapping(
+            value = "/{addressId}",
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    @Operation(summary = "Get the address by identifier for authenticated customer")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Address successfully found"),
+            @ApiResponse(responseCode = "404", description = "Address was not found by identifier"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    ResponseEntity<GetAddressByIdResponse> getAddressById(
+            @PathVariable String addressId
     );
 }
