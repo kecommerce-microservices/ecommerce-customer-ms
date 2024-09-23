@@ -1,6 +1,7 @@
 package com.kaua.ecommerce.customer.infrastructure.rest.controllers;
 
 import com.kaua.ecommerce.customer.application.usecases.address.CreateCustomerAddressUseCase;
+import com.kaua.ecommerce.customer.application.usecases.address.GetAddressByIdUseCase;
 import com.kaua.ecommerce.customer.application.usecases.address.UpdateAddressIsDefaultUseCase;
 import com.kaua.ecommerce.customer.application.usecases.address.UpdateAddressUseCase;
 import com.kaua.ecommerce.customer.application.usecases.address.inputs.CreateCustomerAddressInput;
@@ -9,11 +10,13 @@ import com.kaua.ecommerce.customer.application.usecases.address.inputs.UpdateAdd
 import com.kaua.ecommerce.customer.application.usecases.address.outputs.CreateCustomerAddressOutput;
 import com.kaua.ecommerce.customer.application.usecases.address.outputs.UpdateAddressIsDefaultOutput;
 import com.kaua.ecommerce.customer.application.usecases.address.outputs.UpdateAddressOutput;
+import com.kaua.ecommerce.customer.domain.address.AddressId;
 import com.kaua.ecommerce.customer.infrastructure.configurations.authentication.EcommerceUser;
 import com.kaua.ecommerce.customer.infrastructure.rest.AddressRestApi;
 import com.kaua.ecommerce.customer.infrastructure.rest.req.address.CreateCustomerAddressRequest;
 import com.kaua.ecommerce.customer.infrastructure.rest.req.address.UpdateAddressIsDefaultRequest;
 import com.kaua.ecommerce.customer.infrastructure.rest.req.address.UpdateAddressRequest;
+import com.kaua.ecommerce.customer.infrastructure.rest.res.GetAddressByIdResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -31,15 +34,18 @@ public class AddressRestController implements AddressRestApi {
     private final CreateCustomerAddressUseCase createCustomerAddressUseCase;
     private final UpdateAddressIsDefaultUseCase updateAddressIsDefaultUseCase;
     private final UpdateAddressUseCase updateAddressUseCase;
+    private final GetAddressByIdUseCase getAddressByIdUseCase;
 
     public AddressRestController(
             final CreateCustomerAddressUseCase createCustomerAddressUseCase,
             final UpdateAddressIsDefaultUseCase updateAddressIsDefaultUseCase,
-            final UpdateAddressUseCase updateAddressUseCase
+            final UpdateAddressUseCase updateAddressUseCase,
+            final GetAddressByIdUseCase getAddressByIdUseCase
     ) {
         this.createCustomerAddressUseCase = Objects.requireNonNull(createCustomerAddressUseCase);
         this.updateAddressIsDefaultUseCase = Objects.requireNonNull(updateAddressIsDefaultUseCase);
         this.updateAddressUseCase = Objects.requireNonNull(updateAddressUseCase);
+        this.getAddressByIdUseCase = Objects.requireNonNull(getAddressByIdUseCase);
     }
 
     @Override
@@ -108,5 +114,15 @@ public class AddressRestController implements AddressRestApi {
 
         log.info("Address updated: {}", aOutput);
         return ResponseEntity.ok(aOutput);
+    }
+
+    @Override
+    public ResponseEntity<GetAddressByIdResponse> getAddressById(final String addressId) {
+        log.debug("Received a request to get the address by id: {}", addressId);
+
+        final var aAddressId = new AddressId(UUID.fromString(addressId));
+        final var aOutput = this.getAddressByIdUseCase.execute(aAddressId);
+
+        return ResponseEntity.ok(new GetAddressByIdResponse(aOutput));
     }
 }
