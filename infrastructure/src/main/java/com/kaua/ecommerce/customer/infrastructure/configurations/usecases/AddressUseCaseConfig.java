@@ -2,14 +2,8 @@ package com.kaua.ecommerce.customer.infrastructure.configurations.usecases;
 
 import com.kaua.ecommerce.customer.application.gateways.AddressGateway;
 import com.kaua.ecommerce.customer.application.repositories.AddressRepository;
-import com.kaua.ecommerce.customer.application.usecases.address.CreateCustomerAddressUseCase;
-import com.kaua.ecommerce.customer.application.usecases.address.GetAddressByIdUseCase;
-import com.kaua.ecommerce.customer.application.usecases.address.UpdateAddressIsDefaultUseCase;
-import com.kaua.ecommerce.customer.application.usecases.address.UpdateAddressUseCase;
-import com.kaua.ecommerce.customer.application.usecases.address.impl.DefaultCreateCustomerAddressUseCase;
-import com.kaua.ecommerce.customer.application.usecases.address.impl.DefaultGetAddressByIdUseCase;
-import com.kaua.ecommerce.customer.application.usecases.address.impl.DefaultUpdateAddressIsDefaultUseCase;
-import com.kaua.ecommerce.customer.application.usecases.address.impl.DefaultUpdateAddressUseCase;
+import com.kaua.ecommerce.customer.application.usecases.address.*;
+import com.kaua.ecommerce.customer.application.usecases.address.impl.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -44,5 +38,12 @@ public class AddressUseCaseConfig {
             final AddressRepository addressRepository
     ) {
         return new DefaultGetAddressByIdUseCase(addressRepository);
+    }
+
+    @Bean
+    public GetDefaultAddressByCustomerIdUseCase getDefaultAddressByCustomerIdUseCase(
+            final AddressRepository addressRepository
+    ) {
+        return new DefaultGetDefaultAddressByCustomerIdUseCase(addressRepository);
     }
 }
