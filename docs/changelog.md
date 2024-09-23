@@ -12,6 +12,7 @@
 - [X] Adicionado a criação do address do customer
 - [X] Adicionado a atualização do is default do address
 - [X] Adicionado a atualização do address (title, zipcode, number, complement, district, city, state)
+- [X] Adicionado a rota para pegar o address pelo id
 
 # 0.1.0
 - [X] Adicionado o setup inicial do projeto
