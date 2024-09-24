@@ -137,5 +137,23 @@ public final class Fixture {
                     aIsDefault
             );
         }
+
+        public static Address newAddressWithTitle(final CustomerId aCustomerId, final String title, final boolean aIsDefault) {
+            final var aAddress = faker.address();
+
+            return Address.newAddress(
+                    new Title(title),
+                    aCustomerId,
+                    aAddress.zipCode(),
+                    aAddress.buildingNumber(),
+                    aAddress.streetName(),
+                    aAddress.city(),
+                    "District",
+                    aAddress.country(),
+                    aAddress.state(),
+                    "Complement",
+                    aIsDefault
+            );
+        }
     }
 }
