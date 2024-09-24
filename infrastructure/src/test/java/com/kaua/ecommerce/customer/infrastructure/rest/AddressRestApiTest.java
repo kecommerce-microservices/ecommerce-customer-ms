@@ -9,6 +9,8 @@ import com.kaua.ecommerce.customer.application.usecases.address.outputs.*;
 import com.kaua.ecommerce.customer.domain.Fixture;
 import com.kaua.ecommerce.customer.domain.customer.CustomerId;
 import com.kaua.ecommerce.customer.infrastructure.rest.controllers.AddressRestController;
+import com.kaua.ecommerce.lib.domain.pagination.Pagination;
+import com.kaua.ecommerce.lib.domain.pagination.PaginationMetadata;
 import com.kaua.ecommerce.lib.domain.utils.IdentifierUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -22,6 +24,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
+import java.util.List;
 import java.util.UUID;
 
 import static com.kaua.ecommerce.customer.ApiTest.admin;
@@ -48,6 +51,9 @@ class AddressRestApiTest {
 
     @MockBean
     private GetDefaultAddressByCustomerIdUseCase getDefaultAddressByCustomerIdUseCase;
+
+    @MockBean
+    private ListCustomerAddressesUseCase listCustomerAddressesUseCase;
 
     @Captor
     private ArgumentCaptor<CreateCustomerAddressInput> createCustomerAddressInputCaptor;
@@ -280,5 +286,64 @@ class AddressRestApiTest {
                 .andExpect(jsonPath("$.created_at").value(aAddress.getCreatedAt().toString()))
                 .andExpect(jsonPath("$.updated_at").value(aAddress.getUpdatedAt().toString()))
                 .andExpect(jsonPath("$.version").isNotEmpty());
+    }
+
+    @Test
+    void givenAValidValues_whenCallListCustomerAddresses_thenReturnAddressesPaginated() throws Exception {
+        final var aCustomerId = new CustomerId(IdentifierUtils.generateNewUUID());
+
+        final var aAddressOne = Fixture.Addresses.newAddressWithComplement(aCustomerId, true);
+        final var aAddressTwo = Fixture.Addresses.newAddressWithComplement(aCustomerId, false);
+
+        final var aPage = 0;
+        final var aPerPage = 2;
+        final var aTerms = "";
+        final var aSort = "created_at";
+        final var aDirection = "asc";
+        final var aItemsCount = 2;
+        final var aPagesCount = 1;
+
+        final var aItems = List.of(new ListCustomerAddressesOutput(aAddressOne), new ListCustomerAddressesOutput(aAddressTwo));
+        final var aMetadata = new PaginationMetadata(aPage, aPerPage, aPagesCount, aItemsCount);
+
+        Mockito.when(listCustomerAddressesUseCase.execute(any()))
+                .thenReturn(new Pagination<>(aMetadata, aItems));
+
+        final var aRequest = MockMvcRequestBuilders.get("/v1/addresses")
+                .with(admin(IdentifierUtils.generateNewUUID(), aCustomerId.value()))
+                .queryParam("page", String.valueOf(aPage))
+                .queryParam("perPage", String.valueOf(aPerPage))
+                .queryParam("search", aTerms)
+                .queryParam("sort", aSort)
+                .queryParam("direction", aDirection)
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .contentType(MediaType.APPLICATION_JSON_VALUE);
+
+        final var aResponse = this.mvc.perform(aRequest);
+
+        aResponse
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andExpect(header().string("Content-Type", MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.metadata.current_page").value(aPage))
+                .andExpect(jsonPath("$.metadata.per_page").value(aPerPage))
+                .andExpect(jsonPath("$.metadata.total_pages").value(aPagesCount))
+                .andExpect(jsonPath("$.metadata.total_items").value(aItemsCount))
+                .andExpect(jsonPath("$.items").isArray())
+                .andExpect(jsonPath("$.items").isNotEmpty())
+                .andExpect(jsonPath("$.items[0].id").value(aAddressOne.getId().value().toString()))
+                .andExpect(jsonPath("$.items[0].title").value(aAddressOne.getTitle().value()))
+                .andExpect(jsonPath("$.items[0].customer_id").value(aAddressOne.getCustomerId().value().toString()))
+                .andExpect(jsonPath("$.items[0].zip_code").value(aAddressOne.getZipCode()))
+                .andExpect(jsonPath("$.items[0].number").value(aAddressOne.getNumber()))
+                .andExpect(jsonPath("$.items[0].street").value(aAddressOne.getStreet()))
+                .andExpect(jsonPath("$.items[0].city").value(aAddressOne.getCity()))
+                .andExpect(jsonPath("$.items[0].district").value(aAddressOne.getDistrict()))
+                .andExpect(jsonPath("$.items[0].state").value(aAddressOne.getState()))
+                .andExpect(jsonPath("$.items[0].created_at").value(aAddressOne.getCreatedAt().toString()))
+                .andExpect(jsonPath("$.items[0].updated_at").value(aAddressOne.getUpdatedAt().toString()))
+                .andExpect(jsonPath("$.items[1].id").value(aAddressTwo.getId().value().toString()));
+
+        Mockito.verify(listCustomerAddressesUseCase, Mockito.times(1)).execute(any());
     }
 }
