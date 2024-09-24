@@ -9,6 +9,8 @@ import com.kaua.ecommerce.customer.infrastructure.rest.req.address.UpdateAddress
 import com.kaua.ecommerce.customer.infrastructure.rest.req.address.UpdateAddressRequest;
 import com.kaua.ecommerce.customer.infrastructure.rest.res.GetAddressByIdResponse;
 import com.kaua.ecommerce.customer.infrastructure.rest.res.GetDefaultAddressByCustomerIdResponse;
+import com.kaua.ecommerce.customer.infrastructure.rest.res.ListCustomerAddressesResponse;
+import com.kaua.ecommerce.lib.domain.pagination.Pagination;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -98,5 +100,22 @@ public interface AddressRestApi {
     })
     ResponseEntity<GetDefaultAddressByCustomerIdResponse> getDefaultAddressByCustomerId(
             @AuthenticationPrincipal EcommerceUser user
+    );
+
+    @GetMapping(
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    @Operation(summary = "Get all addresses by customer identifier for authenticated customer")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Addresses successfully found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    Pagination<ListCustomerAddressesResponse> listCustomerAddresses(
+            @AuthenticationPrincipal EcommerceUser user,
+            @RequestParam(name = "search", required = false, defaultValue = "") String search,
+            @RequestParam(name = "page", required = false, defaultValue = "0") int page,
+            @RequestParam(name = "perPage", required = false, defaultValue = "10") int perPage,
+            @RequestParam(name = "sort", required = false, defaultValue = "title") String sort,
+            @RequestParam(name = "direction", required = false, defaultValue = "asc") String direction
     );
 }

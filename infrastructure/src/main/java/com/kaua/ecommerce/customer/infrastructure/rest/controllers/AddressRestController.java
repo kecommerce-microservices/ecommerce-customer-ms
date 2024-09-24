@@ -2,6 +2,7 @@ package com.kaua.ecommerce.customer.infrastructure.rest.controllers;
 
 import com.kaua.ecommerce.customer.application.usecases.address.*;
 import com.kaua.ecommerce.customer.application.usecases.address.inputs.CreateCustomerAddressInput;
+import com.kaua.ecommerce.customer.application.usecases.address.inputs.ListCustomerAddressesInput;
 import com.kaua.ecommerce.customer.application.usecases.address.inputs.UpdateAddressInput;
 import com.kaua.ecommerce.customer.application.usecases.address.inputs.UpdateAddressIsDefaultInput;
 import com.kaua.ecommerce.customer.application.usecases.address.outputs.CreateCustomerAddressOutput;
@@ -16,6 +17,9 @@ import com.kaua.ecommerce.customer.infrastructure.rest.req.address.UpdateAddress
 import com.kaua.ecommerce.customer.infrastructure.rest.req.address.UpdateAddressRequest;
 import com.kaua.ecommerce.customer.infrastructure.rest.res.GetAddressByIdResponse;
 import com.kaua.ecommerce.customer.infrastructure.rest.res.GetDefaultAddressByCustomerIdResponse;
+import com.kaua.ecommerce.customer.infrastructure.rest.res.ListCustomerAddressesResponse;
+import com.kaua.ecommerce.lib.domain.pagination.Pagination;
+import com.kaua.ecommerce.lib.domain.pagination.SearchQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -35,19 +39,22 @@ public class AddressRestController implements AddressRestApi {
     private final UpdateAddressUseCase updateAddressUseCase;
     private final GetAddressByIdUseCase getAddressByIdUseCase;
     private final GetDefaultAddressByCustomerIdUseCase getDefaultAddressByCustomerIdUseCase;
+    private final ListCustomerAddressesUseCase listCustomerAddressesUseCase;
 
     public AddressRestController(
             final CreateCustomerAddressUseCase createCustomerAddressUseCase,
             final UpdateAddressIsDefaultUseCase updateAddressIsDefaultUseCase,
             final UpdateAddressUseCase updateAddressUseCase,
             final GetAddressByIdUseCase getAddressByIdUseCase,
-            final GetDefaultAddressByCustomerIdUseCase getDefaultAddressByCustomerIdUseCase
+            final GetDefaultAddressByCustomerIdUseCase getDefaultAddressByCustomerIdUseCase,
+            final ListCustomerAddressesUseCase listCustomerAddressesUseCase
     ) {
         this.createCustomerAddressUseCase = Objects.requireNonNull(createCustomerAddressUseCase);
         this.updateAddressIsDefaultUseCase = Objects.requireNonNull(updateAddressIsDefaultUseCase);
         this.updateAddressUseCase = Objects.requireNonNull(updateAddressUseCase);
         this.getAddressByIdUseCase = Objects.requireNonNull(getAddressByIdUseCase);
         this.getDefaultAddressByCustomerIdUseCase = Objects.requireNonNull(getDefaultAddressByCustomerIdUseCase);
+        this.listCustomerAddressesUseCase = Objects.requireNonNull(listCustomerAddressesUseCase);
     }
 
     @Override
@@ -138,5 +145,25 @@ public class AddressRestController implements AddressRestApi {
         final var aOutput = this.getDefaultAddressByCustomerIdUseCase.execute(aCustomerId);
 
         return ResponseEntity.ok(new GetDefaultAddressByCustomerIdResponse(aOutput));
+    }
+
+    @Override
+    public Pagination<ListCustomerAddressesResponse> listCustomerAddresses(
+            final EcommerceUser user,
+            final String search,
+            final int page,
+            final int perPage,
+            final String sort,
+            final String direction
+    ) {
+        log.debug("Received a request to list the addresses by customer id: {}", user.customerId());
+
+        final var aCustomerId = new CustomerId(user.customerId());
+        final var aSearchQuery = new SearchQuery(page, perPage, search, sort, direction);
+
+        final var aInput = new ListCustomerAddressesInput(aCustomerId, aSearchQuery);
+
+        return this.listCustomerAddressesUseCase.execute(aInput)
+                .map(ListCustomerAddressesResponse::new);
     }
 }
