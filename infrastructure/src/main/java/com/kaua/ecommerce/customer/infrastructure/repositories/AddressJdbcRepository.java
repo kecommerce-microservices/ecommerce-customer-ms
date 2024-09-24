@@ -8,9 +8,14 @@ import com.kaua.ecommerce.customer.domain.customer.CustomerId;
 import com.kaua.ecommerce.customer.infrastructure.jdbc.DatabaseClient;
 import com.kaua.ecommerce.customer.infrastructure.jdbc.JdbcUtils;
 import com.kaua.ecommerce.customer.infrastructure.jdbc.RowMap;
+import com.kaua.ecommerce.lib.domain.pagination.Pagination;
+import com.kaua.ecommerce.lib.domain.pagination.PaginationMetadata;
+import com.kaua.ecommerce.lib.domain.pagination.SearchQuery;
 import com.kaua.ecommerce.lib.infrastructure.exceptions.ConflictException;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -70,6 +75,48 @@ public class AddressJdbcRepository implements AddressRepository {
     public boolean existsByCustomerIdAndIsDefaultTrue(final CustomerId aCustomerId) {
         final var aSql = "SELECT COUNT(*) FROM addresses WHERE customer_id = :customerId AND is_default = true";
         return this.databaseClient.count(aSql, Map.of(CUSTOMER_COLUMN, aCustomerId.value())) > 0;
+    }
+
+    @Override
+    public Pagination<Address> addressesByCustomerId(
+            final CustomerId customerId,
+            final SearchQuery searchQuery
+    ) {
+        final var aSqlRetrieve = """
+                SELECT * FROM addresses
+                WHERE customer_id = :customerId
+                AND (:terms IS NULL OR LOWER(title) LIKE LOWER(:terms))
+                ORDER BY
+                CASE WHEN :sort IN ('title', 'created_at', 'updated_at') THEN :sort ELSE title END
+                """ + Sort.Direction.fromString(searchQuery.direction()).name() + """
+                 LIMIT :limit OFFSET (:offset)
+                """;
+
+        // Example: page = 1, perPage = 10, offset = 0 or page = 2, perPage = 10, offset = 10, offset speak to db where to start
+        final var aOffset = Math.max(0, (searchQuery.page() - 1) * searchQuery.perPage());
+        final var aTerms = StringUtils.isNotEmpty(searchQuery.terms())
+                ? "%" + searchQuery.terms() + "%"
+                : null;
+
+        final Map<String, Object> aParams = new HashMap<>();
+        aParams.put(CUSTOMER_COLUMN, customerId.value());
+        aParams.put("terms", aTerms);
+        aParams.put("sort", searchQuery.sort());
+        aParams.put("limit", searchQuery.perPage());
+        aParams.put("offset", aOffset);
+
+        final var aItems = this.databaseClient.query(aSqlRetrieve, aParams, addressMapper());
+
+        final var aTotalPages = (int) Math.ceil((double) aItems.size() / searchQuery.perPage());
+
+        final var aMetadata = new PaginationMetadata(
+                searchQuery.page(),
+                searchQuery.perPage(),
+                aTotalPages,
+                aItems.size()
+        );
+
+        return new Pagination<>(aMetadata, aItems);
     }
 
     private void create(final Address aAddress) {
