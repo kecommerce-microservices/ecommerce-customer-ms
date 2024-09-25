@@ -119,6 +119,12 @@ public class AddressJdbcRepository implements AddressRepository {
         return new Pagination<>(aMetadata, aItems);
     }
 
+    @Override
+    public void delete(final AddressId addressId) {
+        final var aSql = "DELETE FROM addresses WHERE id = :id";
+        this.databaseClient.update(aSql, Map.of("id", addressId.value()));
+    }
+
     private void create(final Address aAddress) {
         final var aSql = """
                 INSERT INTO addresses (id, version, title, customer_id, zip_code, number, street, city, district, country, state, complement, is_default, created_at, updated_at)
