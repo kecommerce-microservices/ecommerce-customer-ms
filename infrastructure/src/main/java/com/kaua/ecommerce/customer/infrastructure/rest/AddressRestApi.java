@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -117,5 +118,19 @@ public interface AddressRestApi {
             @RequestParam(name = "perPage", required = false, defaultValue = "10") int perPage,
             @RequestParam(name = "sort", required = false, defaultValue = "title") String sort,
             @RequestParam(name = "direction", required = false, defaultValue = "asc") String direction
+    );
+
+    @DeleteMapping(
+            value = "/{addressId}",
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    @Operation(summary = "Delete the address by identifier")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Address successfully deleted"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void deleteAddressById(
+            @PathVariable String addressId
     );
 }
