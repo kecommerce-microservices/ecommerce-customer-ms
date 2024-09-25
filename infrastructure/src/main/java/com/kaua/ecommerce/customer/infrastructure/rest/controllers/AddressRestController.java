@@ -40,6 +40,7 @@ public class AddressRestController implements AddressRestApi {
     private final GetAddressByIdUseCase getAddressByIdUseCase;
     private final GetDefaultAddressByCustomerIdUseCase getDefaultAddressByCustomerIdUseCase;
     private final ListCustomerAddressesUseCase listCustomerAddressesUseCase;
+    private final DeleteAddressByIdUseCase deleteAddressByIdUseCase;
 
     public AddressRestController(
             final CreateCustomerAddressUseCase createCustomerAddressUseCase,
@@ -47,7 +48,8 @@ public class AddressRestController implements AddressRestApi {
             final UpdateAddressUseCase updateAddressUseCase,
             final GetAddressByIdUseCase getAddressByIdUseCase,
             final GetDefaultAddressByCustomerIdUseCase getDefaultAddressByCustomerIdUseCase,
-            final ListCustomerAddressesUseCase listCustomerAddressesUseCase
+            final ListCustomerAddressesUseCase listCustomerAddressesUseCase,
+            final DeleteAddressByIdUseCase deleteAddressByIdUseCase
     ) {
         this.createCustomerAddressUseCase = Objects.requireNonNull(createCustomerAddressUseCase);
         this.updateAddressIsDefaultUseCase = Objects.requireNonNull(updateAddressIsDefaultUseCase);
@@ -55,6 +57,7 @@ public class AddressRestController implements AddressRestApi {
         this.getAddressByIdUseCase = Objects.requireNonNull(getAddressByIdUseCase);
         this.getDefaultAddressByCustomerIdUseCase = Objects.requireNonNull(getDefaultAddressByCustomerIdUseCase);
         this.listCustomerAddressesUseCase = Objects.requireNonNull(listCustomerAddressesUseCase);
+        this.deleteAddressByIdUseCase = Objects.requireNonNull(deleteAddressByIdUseCase);
     }
 
     @Override
@@ -165,5 +168,14 @@ public class AddressRestController implements AddressRestApi {
 
         return this.listCustomerAddressesUseCase.execute(aInput)
                 .map(ListCustomerAddressesResponse::new);
+    }
+
+    @Override
+    public void deleteAddressById(final String addressId) {
+        log.debug("Received a request to delete the address by id: {}", addressId);
+
+        final var aAddressId = new AddressId(UUID.fromString(addressId));
+
+        this.deleteAddressByIdUseCase.execute(aAddressId);
     }
 }

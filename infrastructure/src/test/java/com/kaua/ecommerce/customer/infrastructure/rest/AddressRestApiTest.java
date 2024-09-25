@@ -7,6 +7,7 @@ import com.kaua.ecommerce.customer.application.usecases.address.inputs.UpdateAdd
 import com.kaua.ecommerce.customer.application.usecases.address.inputs.UpdateAddressIsDefaultInput;
 import com.kaua.ecommerce.customer.application.usecases.address.outputs.*;
 import com.kaua.ecommerce.customer.domain.Fixture;
+import com.kaua.ecommerce.customer.domain.address.AddressId;
 import com.kaua.ecommerce.customer.domain.customer.CustomerId;
 import com.kaua.ecommerce.customer.infrastructure.rest.controllers.AddressRestController;
 import com.kaua.ecommerce.lib.domain.pagination.Pagination;
@@ -54,6 +55,9 @@ class AddressRestApiTest {
 
     @MockBean
     private ListCustomerAddressesUseCase listCustomerAddressesUseCase;
+
+    @MockBean
+    private DeleteAddressByIdUseCase deleteAddressByIdUseCase;
 
     @Captor
     private ArgumentCaptor<CreateCustomerAddressInput> createCustomerAddressInputCaptor;
@@ -345,5 +349,25 @@ class AddressRestApiTest {
                 .andExpect(jsonPath("$.items[1].id").value(aAddressTwo.getId().value().toString()));
 
         Mockito.verify(listCustomerAddressesUseCase, Mockito.times(1)).execute(any());
+    }
+
+    @Test
+    void givenAValidAddressId_whenCallDeleteAddressById_thenReturnNoContent() throws Exception {
+        final var aAddressId = new AddressId(IdentifierUtils.generateNewUUID());
+
+        Mockito.doNothing().when(deleteAddressByIdUseCase).execute(aAddressId);
+
+        final var aRequest = MockMvcRequestBuilders.delete("/v1/addresses/%s".formatted(aAddressId.value()))
+                .with(admin(IdentifierUtils.generateNewUUID(), UUID.randomUUID()))
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .contentType(MediaType.APPLICATION_JSON_VALUE);
+
+        final var aResponse = this.mvc.perform(aRequest);
+
+        aResponse
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isNoContent());
+
+        Mockito.verify(deleteAddressByIdUseCase, Mockito.times(1)).execute(aAddressId);
     }
 }

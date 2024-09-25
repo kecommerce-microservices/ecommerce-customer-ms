@@ -53,4 +53,11 @@ public class AddressUseCaseConfig {
     ) {
         return new DefaultListCustomerAddressesUseCase(addressRepository);
     }
+
+    @Bean
+    public DeleteAddressByIdUseCase deleteAddressByIdUseCase(
+            final AddressRepository addressRepository
+    ) {
+        return new DefaultDeleteAddressByIdUseCase(addressRepository);
+    }
 }
