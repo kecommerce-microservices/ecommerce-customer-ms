@@ -15,6 +15,7 @@
 - [X] Adicionado a rota para pegar o address pelo id
 - [X] Adicionado a rota para pegar o default address do customer autenticado
 - [X] Adicionado a listagem dos addresses do customer autenticado
+- [X] Adicionado a rota para deletar o address pelo id
 
 # 0.1.0
 - [X] Adicionado o setup inicial do projeto
