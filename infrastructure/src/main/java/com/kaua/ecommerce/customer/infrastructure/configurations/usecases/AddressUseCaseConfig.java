@@ -46,4 +46,11 @@ public class AddressUseCaseConfig {
     ) {
         return new DefaultGetDefaultAddressByCustomerIdUseCase(addressRepository);
     }
+
+    @Bean
+    public ListCustomerAddressesUseCase listCustomerAddressesUseCase(
+            final AddressRepository addressRepository
+    ) {
+        return new DefaultListCustomerAddressesUseCase(addressRepository);
+    }
 }

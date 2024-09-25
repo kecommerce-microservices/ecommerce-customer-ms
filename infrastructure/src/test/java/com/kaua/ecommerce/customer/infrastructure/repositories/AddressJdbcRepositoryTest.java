@@ -5,6 +5,7 @@ import com.kaua.ecommerce.customer.domain.Fixture;
 import com.kaua.ecommerce.customer.domain.address.Address;
 import com.kaua.ecommerce.customer.domain.address.Title;
 import com.kaua.ecommerce.customer.domain.customer.CustomerId;
+import com.kaua.ecommerce.lib.domain.pagination.SearchQuery;
 import com.kaua.ecommerce.lib.domain.utils.IdentifierUtils;
 import com.kaua.ecommerce.lib.infrastructure.exceptions.ConflictException;
 import org.junit.jupiter.api.Assertions;
@@ -274,5 +275,138 @@ class AddressJdbcRepositoryTest extends AbstractRepositoryTest {
         });
 
         Assertions.assertEquals(expectedErrorMessage, aException.getMessage());
+    }
+
+    @Test
+    void givenAValidValues_whenCallAddressesByCustomerId_thenReturnPaginatedAddresses() {
+        Assertions.assertEquals(0, countAddresses());
+
+        final var aCustomerId = new CustomerId(IdentifierUtils.generateNewUUID());
+
+        final var aAddressOne = Fixture.Addresses.newAddressWithComplement(
+                aCustomerId,
+                true
+        );
+        final var aAddressTwo = Fixture.Addresses.newAddressWithComplement(
+                aCustomerId,
+                false
+        );
+
+        this.addressRepository().save(aAddressOne);
+        this.addressRepository().save(aAddressTwo);
+        this.addressRepository().save(Fixture.Addresses.newAddressWithComplement(
+                new CustomerId(IdentifierUtils.generateNewUUID()),
+                false
+        ));
+
+        final var aPage = 0;
+        final var aPerPage = 10;
+        final var aTerms = "";
+        final var aDirection = "asc";
+        final var aSort = "created_at";
+        final var aTotalPages = 1;
+        final var aTotalItems = 2;
+
+        final var aSearchQuery = new SearchQuery(
+                aPage,
+                aPerPage,
+                aTerms,
+                aSort,
+                aDirection
+        );
+
+        Assertions.assertEquals(3, countAddresses());
+
+        final var aActualResponse = this.addressRepository().addressesByCustomerId(aCustomerId, aSearchQuery);
+
+        Assertions.assertEquals(aTotalPages, aActualResponse.metadata().totalPages());
+        Assertions.assertEquals(aTotalItems, aActualResponse.metadata().totalItems());
+        Assertions.assertEquals(aPage, aActualResponse.metadata().currentPage());
+        Assertions.assertEquals(aPerPage, aActualResponse.metadata().perPage());
+        Assertions.assertEquals(aAddressOne.getId().value(), aActualResponse.items().get(0).getId().value());
+        Assertions.assertEquals(aAddressTwo.getId().value(), aActualResponse.items().get(1).getId().value());
+    }
+
+    @Test
+    void givenAValidValuesButNoHasData_whenCallAddressesByCustomerId_thenReturnEmptyPaginated() {
+        Assertions.assertEquals(0, countAddresses());
+
+        final var aCustomerId = new CustomerId(IdentifierUtils.generateNewUUID());
+
+        final var aPage = 0;
+        final var aPerPage = 10;
+        final var aTerms = "";
+        final var aDirection = "asc";
+        final var aSort = "created_at";
+        final var aTotalPages = 0;
+        final var aTotalItems = 0;
+
+        final var aSearchQuery = new SearchQuery(
+                aPage,
+                aPerPage,
+                aTerms,
+                aSort,
+                aDirection
+        );
+
+        Assertions.assertEquals(0, countAddresses());
+
+        final var aActualResponse = this.addressRepository().addressesByCustomerId(aCustomerId, aSearchQuery);
+
+        Assertions.assertEquals(aTotalPages, aActualResponse.metadata().totalPages());
+        Assertions.assertEquals(aTotalItems, aActualResponse.metadata().totalItems());
+        Assertions.assertEquals(aPage, aActualResponse.metadata().currentPage());
+        Assertions.assertEquals(aPerPage, aActualResponse.metadata().perPage());
+        Assertions.assertTrue(aActualResponse.items().isEmpty());
+    }
+
+    @Test
+    void givenAValidValuesWithTerm_whenCallAddressesByCustomerId_thenReturnPaginatedAddresses() {
+        Assertions.assertEquals(0, countAddresses());
+
+        final var aCustomerId = new CustomerId(IdentifierUtils.generateNewUUID());
+
+        final var aAddressOne = Fixture.Addresses.newAddressWithTitle(
+                aCustomerId,
+                "Work",
+                true
+        );
+        final var aAddressTwo = Fixture.Addresses.newAddressWithComplement(
+                aCustomerId,
+                false
+        );
+
+        this.addressRepository().save(aAddressOne);
+        this.addressRepository().save(aAddressTwo);
+        this.addressRepository().save(Fixture.Addresses.newAddressWithComplement(
+                new CustomerId(IdentifierUtils.generateNewUUID()),
+                false
+        ));
+
+        final var aPage = 0;
+        final var aPerPage = 10;
+        final var aTerms = "w";
+        final var aDirection = "asc";
+        final var aSort = "created_at";
+        final var aTotalPages = 1;
+        final var aTotalItems = 1;
+
+        final var aSearchQuery = new SearchQuery(
+                aPage,
+                aPerPage,
+                aTerms,
+                aSort,
+                aDirection
+        );
+
+        Assertions.assertEquals(3, countAddresses());
+
+        final var aActualResponse = this.addressRepository().addressesByCustomerId(aCustomerId, aSearchQuery);
+
+        Assertions.assertEquals(aTotalPages, aActualResponse.metadata().totalPages());
+        Assertions.assertEquals(aTotalItems, aActualResponse.metadata().totalItems());
+        Assertions.assertEquals(aPage, aActualResponse.metadata().currentPage());
+        Assertions.assertEquals(aPerPage, aActualResponse.metadata().perPage());
+        Assertions.assertEquals(aAddressOne.getId().value(), aActualResponse.items().get(0).getId().value());
     }
 }
