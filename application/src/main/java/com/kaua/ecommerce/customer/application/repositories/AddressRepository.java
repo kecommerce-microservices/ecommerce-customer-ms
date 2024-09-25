@@ -21,4 +21,6 @@ public interface AddressRepository {
     boolean existsByCustomerIdAndIsDefaultTrue(CustomerId customerId);
 
     Pagination<Address> addressesByCustomerId(CustomerId customerId, SearchQuery searchQuery);
+
+    void delete(AddressId addressId);
 }
