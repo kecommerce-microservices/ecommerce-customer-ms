@@ -409,4 +409,24 @@ class AddressJdbcRepositoryTest extends AbstractRepositoryTest {
         Assertions.assertEquals(aPerPage, aActualResponse.metadata().perPage());
         Assertions.assertEquals(aAddressOne.getId().value(), aActualResponse.items().get(0).getId().value());
     }
+
+    @Test
+    void givenAValidAddressId_whenCallDelete_thenAddressIsDeleted() {
+        Assertions.assertEquals(0, countAddresses());
+
+        final var aCustomerId = new CustomerId(IdentifierUtils.generateNewUUID());
+
+        final var aAddress = Fixture.Addresses.newAddressWithComplement(
+                aCustomerId,
+                true
+        );
+
+        this.addressRepository().save(aAddress);
+
+        Assertions.assertEquals(1, countAddresses());
+
+        this.addressRepository().delete(aAddress.getId());
+
+        Assertions.assertEquals(0, countAddresses());
+    }
 }
